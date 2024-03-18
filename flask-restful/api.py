@@ -7,7 +7,7 @@ api = Api(app)
 
 class HelloWorld(Resource):
     def get(self):
-        return {'hello': 'black man'}
+        return {'hello': 'yellow man'}
 
 
 api.add_resource(HelloWorld, '/')
