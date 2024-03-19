@@ -16,8 +16,8 @@ mysql = MySQL(app)
 
 def testDatabase(loginGiven, passwordGiven):
 
-    myLogin = loginGiven
-    myPass = passwordGiven
+    myLogin = "'" + loginGiven + "'"
+    myPass = "'" + passwordGiven + "'"
     # Creating a connection cursor
     cursor = mysql.connection.cursor()
 
