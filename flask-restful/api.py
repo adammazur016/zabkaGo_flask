@@ -29,7 +29,7 @@ def testDatabase(loginGiven, passwordGiven):
 
     print(f'The query is: {query}')
 
-    cursor.execute("'" + query + '"')
+    cursor.execute(query)
 
     # Saving the Actions performed on the DB
     mysql.connection.commit()
