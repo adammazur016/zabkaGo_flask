@@ -23,16 +23,14 @@ def testDatabase(loginGiven, passwordGiven):
 
     # Executing SQL Statements
 
-
-
-    query = 'INSERT INTO users VALUES(null, ' + myLogin + ', ' + myPass + ', ' + '12345)'
+    query = "SELECT password FROM users WHERE login = " + myLogin
 
     print(f'The query is: {query}')
 
-    cursor.execute(query)
+    #cursor.execute(query)
 
     # Saving the Actions performed on the DB
-    mysql.connection.commit()
+   # mysql.connection.commit()
 
     # Closing the cursor
     cursor.close()
