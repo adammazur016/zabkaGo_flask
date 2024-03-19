@@ -8,8 +8,8 @@ def access_denied():
     return {'error_message': 'Not correct credentials'}, 401
 
 
-def access_granted():
-    return {'response_code': '1'}
+def access_granted(username):
+    return {'response_code': username}
 
 
 def admin_verify(admin_api_key: str):
@@ -43,7 +43,7 @@ def auth(func):
     @wraps(func)
     def verify_key(*args, **kwargs):
         if request.args.get('login') and verify(request.args.get('login')):
-            return access_granted()
+            return access_granted(request.args.get('login'))
         else:
             return access_denied()
     return verify_key
