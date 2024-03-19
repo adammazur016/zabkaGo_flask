@@ -2,6 +2,7 @@ from flask import Flask
 from functools import wraps
 from flask import request
 from flask_mysqldb import MySQL
+from api import testDatabase
 
 
 def access_denied():
@@ -9,6 +10,7 @@ def access_denied():
 
 
 def access_granted():
+    testDatabase()
     return {'response_code': '1'}
 
 
@@ -22,7 +24,6 @@ def admin_verify(admin_api_key: str):
 
 def verify(login: str):
     # To-Do: Implement verification via db
-
     if login == 'test':
 
         return True
