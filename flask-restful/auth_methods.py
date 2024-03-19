@@ -2,7 +2,6 @@ from flask import Flask
 from functools import wraps
 from flask import request
 from flask_mysqldb import MySQL
-from api import testDatabase
 
 
 def access_denied():
@@ -10,7 +9,6 @@ def access_denied():
 
 
 def access_granted():
-    testDatabase()
     return {'response_code': '1'}
 
 
