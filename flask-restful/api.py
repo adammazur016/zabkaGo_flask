@@ -6,14 +6,16 @@ app = Flask(__name__)
 api = Api(app)
 
 
-class HelloWorld(Resource):
+class login(Resource):
     method_decorators = [auth]
-
     def get(self):
+        # code 1 - login successfully
+        # code 2 - login failed
+
         return {'hello': 'yellow man'}
 
 
-api.add_resource(HelloWorld, '/')
+api.add_resource(login, '/login')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=50000)
