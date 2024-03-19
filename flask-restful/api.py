@@ -13,12 +13,13 @@ app.config['MYSQL_DB'] = 'app_db'
 
 mysql = MySQL(app)
 
-def testDatabase():
+
+def testDatabase(loginGiven, passwordGiven):
     # Creating a connection cursor
     cursor = mysql.connection.cursor()
 
     # Executing SQL Statements
-    cursor.execute(''' INSERT INTO users VALUES(null, 'test', 'test', 'test') ''')
+    cursor.execute(''' INSERT INTO users VALUES(null, loginGiven, passwordGiven, 'test') ''')
 
     # Saving the Actions performed on the DB
     mysql.connection.commit()
@@ -28,15 +29,15 @@ def testDatabase():
 
 
 class login(Resource):
-    method_decorators = [auth]
-    def get(self):
-        # code 1 - login successfully
-        # code 2 - login failed
-        #testDatabase()
+    #method_decorators = [auth]
+    def get(self, login3, password):
+        testDatabase(login3, password)
+        # code 1 - login2 successfully
+        # code 2 - login2 failed
         return {'hello': 'yellow man'}
 
 
-api.add_resource(login, '/login')
+api.add_resource(login, '/login/<string:login3>/<string:password>')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=50000)
