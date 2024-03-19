@@ -31,7 +31,9 @@ def testDatabase(loginGiven, passwordGiven):
 
     data = cursor.fetchall()
 
-    print(f'The password for user {myLogin} is {data}')
+    correctPassword = data[0][0]
+
+    print(f'The password for user {myLogin} is {correctPassword}')
 
     # Saving the Actions performed on the DB
    # mysql.connection.commit()
