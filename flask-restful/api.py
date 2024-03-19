@@ -14,12 +14,26 @@ app.config['MYSQL_DB'] = 'app_db'
 mysql = MySQL(app)
 
 
+def testDatabase():
+    # Creating a connection cursor
+    cursor = mysql.connection.cursor()
+
+    # Executing SQL Statements
+    cursor.execute(''' INSERT INTO users VALUES(null, 'test', 'test', 'test') ''')
+
+    # Saving the Actions performed on the DB
+    mysql.connection.commit()
+
+    # Closing the cursor
+    cursor.close()
+
+
 class login(Resource):
     method_decorators = [auth]
     def get(self):
         # code 1 - login successfully
         # code 2 - login failed
-
+        testDatabase()
         return {'hello': 'yellow man'}
 
 
