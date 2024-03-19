@@ -23,7 +23,11 @@ def testDatabase(loginGiven, passwordGiven):
 
     # Executing SQL Statements
 
+
+
     query = 'INSERT INTO users VALUES(null, ' + myLogin + ', ' + myPass + ', ' + '12345'
+
+    print(f'The query is: {query}')
 
     cursor.execute("'" + query + '"')
 
