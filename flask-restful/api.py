@@ -15,11 +15,17 @@ mysql = MySQL(app)
 
 
 def testDatabase(loginGiven, passwordGiven):
+
+    myLogin = loginGiven
+    myPass = passwordGiven
     # Creating a connection cursor
     cursor = mysql.connection.cursor()
 
     # Executing SQL Statements
-    cursor.execute(''' INSERT INTO users VALUES(null, loginGiven, passwordGiven, 'test') ''')
+
+    query = 'INSERT INTO users VALUES(null, ' + myLogin + ', ' + myPass + ', ' + '12345'
+
+    cursor.execute("'" + query + '"')
 
     # Saving the Actions performed on the DB
     mysql.connection.commit()
