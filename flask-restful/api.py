@@ -29,7 +29,7 @@ def testDatabase():
 
 
 class login(Resource):
-    method_decorators = [auth]
+    #method_decorators = [auth]
     def get(self):
         # code 1 - login successfully
         # code 2 - login failed
