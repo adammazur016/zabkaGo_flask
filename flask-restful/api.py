@@ -47,6 +47,38 @@ def testDatabase(loginGiven, passwordGiven):
 
     return result
 
+def getPointsFromDb():
+
+    # Creating a connection cursor
+    cursor = mysql.connection.cursor()
+
+    # Executing SQL Statements
+
+    query = "SELECT places.ID, places.lat, places.long FROM places"
+
+    print(f'The query is: {query}')
+
+    cursor.execute(query)
+
+    data = cursor.fetchall()
+
+    places = []
+
+    for place in data:
+        placeID = place[0]
+        placeLat = place[1]
+        placeLong = place[2]
+        places.append({'place_id': placeID, 'latitude': placeLat, 'longitude': placeLong})
+
+
+    # Saving the Actions performed on the DB
+    #mysql.connection.commit()
+
+    # Closing the cursor
+    cursor.close()
+
+    return places
+
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -69,7 +101,8 @@ def login():
 @app.route('/test', methods=['POST'])
 @auth
 def test():
-    return {'dupa': 'dupa'}
+    places = getPointsFromDb()
+    return places
 
 
 if __name__ == '__main__':
