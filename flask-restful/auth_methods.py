@@ -2,17 +2,6 @@ from functools import wraps
 from flask import request
 import mysql.connector
 
-def connectDb():
-    print("DUUUUUUUUPA")
-    mydb = mysql.connector.connect(
-        host="172.18.0.2",
-        user="db_user",
-        password="db_user_pass"
-    )
-    print(mydb)
-
-
-
 def access_denied():
     return {'error_message': 'Not correct credentials'}, 401
 
@@ -26,12 +15,23 @@ def admin_verify(admin_api_key: str):
 
 
 def verify(api_key: str):
-    connectDb()
-    # To-Do: Implement verification via db
-    if api_key == 'test':
+    mydb = mysql.connector.connect(
+        host="172.18.0.2",
+        user="db_user",
+        password="db_user_pass",
+        database="app_db"
+    )
+
+    mycursor = mydb.cursor()
+
+    mycursor.execute("SELECT count(api_key) AS number FROM users WHERE api_key = '"+api_key + "'")
+
+    myresult = mycursor.fetchall()
+
+    for x in myresult:
         return True
-    else:
-        return False
+
+    return False
 
 
 def admin_auth(func):
