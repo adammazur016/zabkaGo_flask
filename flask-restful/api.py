@@ -23,7 +23,7 @@ def testDatabase(loginGiven, passwordGiven):
 
     # Executing SQL Statements
 
-    query = "SELECT password FROM users WHERE login = " + myLogin
+    query = "SELECT password, id, api_key FROM users WHERE login = " + myLogin
 
     print(f'The query is: {query}')
 
@@ -32,6 +32,8 @@ def testDatabase(loginGiven, passwordGiven):
     data = cursor.fetchall()
 
     correctPassword = data[0][0]
+    userId = data[0][1]
+    userApiKey = data[0][2]
 
     print(f'The password for user {myLogin} is {correctPassword}')
 
@@ -41,7 +43,9 @@ def testDatabase(loginGiven, passwordGiven):
     # Closing the cursor
     cursor.close()
 
-    return correctPassword
+    result = [correctPassword, userId, userApiKey]
+
+    return result
 
 
 @app.route('/login', methods=['POST'])
@@ -51,9 +55,14 @@ def login():
     login = request.args.get('login')
     password = request.args.get('password')
 
-    correctPassword = testDatabase(login, password)
+    apiResultDb = testDatabase(login, password)
+
+    correctPassword = apiResultDb[0]
+    userId = apiResultDb[1]
+    userApiKey = apiResultDb[2]
+
     if password == correctPassword:
-        return {'auth': '1', 'id': 'test_id', 'api_key': 'test_api_key'}
+        return {'auth': '1', 'id': userId, 'api_key': userApiKey}
     else:
         return {'auth': '-1', 'id': 'none', 'api_key': 'none'}
 
