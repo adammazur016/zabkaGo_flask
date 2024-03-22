@@ -66,6 +66,10 @@ def login():
     else:
         return {'auth': '-1', 'id': 'none', 'api_key': 'none'}
 
+@app.route('/test', methods=['POST'])
+def test():
+    method_decorators = [auth]
+    return {'dupa': 'dupa'}
 
 
 if __name__ == '__main__':

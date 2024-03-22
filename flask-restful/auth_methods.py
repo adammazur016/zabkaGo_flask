@@ -1,5 +1,15 @@
 from functools import wraps
 from flask import request
+import mysql.connector
+
+def connectDb():
+    mydb = mysql.connector.connect(
+        host="172.18.0.2",
+        user="db_user",
+        password="db_user_pass"
+    )
+    print(mydb)
+
 
 
 def access_denied():
@@ -14,9 +24,10 @@ def admin_verify(admin_api_key: str):
         return False
 
 
-def verify(login: str):
+def verify(api_key: str):
+    connectDb()
     # To-Do: Implement verification via db
-    if login == 'test':
+    if api_key == 'test':
         return True
     else:
         return False
