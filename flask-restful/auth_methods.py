@@ -3,6 +3,7 @@ from flask import request
 import mysql.connector
 
 def connectDb():
+    print("DUUUUUUUUPA")
     mydb = mysql.connector.connect(
         host="172.18.0.2",
         user="db_user",
