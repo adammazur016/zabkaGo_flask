@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
 from auth_methods import admin_auth, auth
 from flask_mysqldb import MySQL
@@ -44,19 +44,20 @@ def testDatabase(loginGiven, passwordGiven):
     return correctPassword
 
 
-class login(Resource):
+@app.route('/login', methods=['POST'])
+def login():
     #method_decorators = [auth]
-    def get(self, login3, password):
-        correctPwd = testDatabase(login3, password)
-        # code 1 - login2 successfully
-        # code 2 - login2 failed
-        if correctPwd == password:
-            return {'auth': '1'}
-        else:
-            return {'auth': 'chuj'}
+
+    login = request.args.get('login')
+    password = request.args.get('password')
+
+    correctPassword = testDatabase(login, password)
+    if password == correctPassword:
+        return {'auth': '1'}
+    else:
+        return {'auth': '-1'}
 
 
-api.add_resource(login, '/login/<string:login3>/<string:password>')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=50000)
