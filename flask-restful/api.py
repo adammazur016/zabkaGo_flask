@@ -53,9 +53,9 @@ def login():
 
     correctPassword = testDatabase(login, password)
     if password == correctPassword:
-        return {'auth': '1'}
+        return {'auth': '1', 'id': 'test_id', 'api_key': 'test_api_key'}
     else:
-        return {'auth': '-1'}
+        return {'auth': '-1', 'id': 'none', 'api_key': 'none'}
 
 
 
