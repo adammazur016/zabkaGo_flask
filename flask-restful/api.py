@@ -67,8 +67,8 @@ def login():
         return {'auth': '-1', 'id': 'none', 'api_key': 'none'}
 
 @app.route('/test', methods=['POST'])
+@auth
 def test():
-    method_decorators = [auth]
     return {'dupa': 'dupa'}
 
 
