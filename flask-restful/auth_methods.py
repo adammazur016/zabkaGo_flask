@@ -28,8 +28,8 @@ def verify(api_key: str):
 
     myresult = mycursor.fetchall()
 
-    if myresult[0] != 0:
-        return True
+    # if myresult[0] != 0:
+    #     return True
 
     return False
 
