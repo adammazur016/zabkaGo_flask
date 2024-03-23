@@ -96,7 +96,7 @@ def login():
     if password == correctPassword:
         return {'auth': '1', 'id': userId, 'api_key': userApiKey}
     else:
-        return {'auth': '-1', 'id': 'none', 'api_key': 'none'}
+        return {'auth': '-1'}
 
 @app.route('/test', methods=['POST'])
 @auth
