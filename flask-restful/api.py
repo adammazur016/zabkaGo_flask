@@ -47,6 +47,7 @@ def testDatabase(loginGiven, passwordGiven):
 
     return result
 
+
 def getPointsFromDb():
 
     # Creating a connection cursor
@@ -97,6 +98,7 @@ def login():
         return {'auth': '1', 'id': userId, 'api_key': userApiKey}
     else:
         return {'auth': '-1'}
+
 
 @app.route('/test', methods=['POST'])
 @auth
