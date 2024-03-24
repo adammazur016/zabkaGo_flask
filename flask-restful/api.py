@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
 from auth_methods import admin_auth, auth
 from flask_mysqldb import MySQL
@@ -23,7 +23,7 @@ def testDatabase(loginGiven, passwordGiven):
 
     # Executing SQL Statements
 
-    query = "SELECT password FROM users WHERE login = " + myLogin
+    query = "SELECT password, id, api_key FROM users WHERE login = " + myLogin
 
     print(f'The query is: {query}')
 
@@ -32,6 +32,8 @@ def testDatabase(loginGiven, passwordGiven):
     data = cursor.fetchall()
 
     correctPassword = data[0][0]
+    userId = data[0][1]
+    userApiKey = data[0][2]
 
     print(f'The password for user {myLogin} is {correctPassword}')
 
@@ -41,22 +43,67 @@ def testDatabase(loginGiven, passwordGiven):
     # Closing the cursor
     cursor.close()
 
-    return correctPassword
+    result = [correctPassword, userId, userApiKey]
+
+    return result
+
+def getPointsFromDb():
+
+    # Creating a connection cursor
+    cursor = mysql.connection.cursor()
+
+    # Executing SQL Statements
+
+    query = "SELECT places.ID, places.lat, places.long FROM places"
+
+    print(f'The query is: {query}')
+
+    cursor.execute(query)
+
+    data = cursor.fetchall()
+
+    places = []
+
+    for place in data:
+        placeID = place[0]
+        placeLat = place[1]
+        placeLong = place[2]
+        places.append({'place_id': placeID, 'latitude': placeLat, 'longitude': placeLong})
 
 
-class login(Resource):
+    # Saving the Actions performed on the DB
+    #mysql.connection.commit()
+
+    # Closing the cursor
+    cursor.close()
+
+    return places
+
+
+@app.route('/login', methods=['POST'])
+def login():
     #method_decorators = [auth]
-    def get(self, login3, password):
-        correctPwd = testDatabase(login3, password)
-        # code 1 - login2 successfully
-        # code 2 - login2 failed
-        if correctPwd == password:
-            return {'auth': '1'}
-        else:
-            return {'auth': '-1'}
 
+    login = request.args.get('login')
+    password = request.args.get('password')
 
-api.add_resource(login, '/login/<string:login3>/<string:password>')
+    apiResultDb = testDatabase(login, password)
+
+    correctPassword = apiResultDb[0]
+    userId = apiResultDb[1]
+    userApiKey = apiResultDb[2]
+
+    if password == correctPassword:
+        return {'auth': '1', 'id': userId, 'api_key': userApiKey}
+    else:
+        return {'auth': '-1'}
+
+@app.route('/test', methods=['POST'])
+@auth
+def test():
+    places = getPointsFromDb()
+    return places
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=50000)
