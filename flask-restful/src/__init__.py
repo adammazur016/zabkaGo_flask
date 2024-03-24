@@ -1,5 +1,4 @@
 from flask import Flask
-from flask_restful import Api
 from flask_mysqldb import MySQL
 from .config.config import Config
 
@@ -8,9 +7,6 @@ config = Config().config
 
 # declaring flask application
 app = Flask(config.APP_NAME)
-
-# declare api
-api = Api(app)
 
 # configure database
 app.config['MYSQL_HOST'] = config.MYSQL_HOST

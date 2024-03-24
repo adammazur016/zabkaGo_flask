@@ -4,8 +4,6 @@
 #
 #    pip-compile --output-file=requirements.txt requirements.in
 #
-aniso8601==9.0.1
-    # via flask-restful
 blinker==1.7.0
     # via flask
 click==8.1.7
@@ -14,10 +12,7 @@ flask==3.0.2
     # via
     #   -r requirements.in
     #   flask-mysqldb
-    #   flask-restful
 flask-mysqldb==2.0.0
-    # via -r requirements.in
-flask-restful==0.3.10
     # via -r requirements.in
 itsdangerous==2.1.2
     # via flask
@@ -33,9 +28,5 @@ mysqlclient==2.2.4
     # via flask-mysqldb
 python-dotenv==1.0.1
     # via -r requirements.in
-pytz==2024.1
-    # via flask-restful
-six==1.16.0
-    # via flask-restful
 werkzeug==3.0.1
     # via flask

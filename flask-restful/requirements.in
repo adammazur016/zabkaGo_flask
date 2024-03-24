@@ -1,5 +1,4 @@
 flask
-flask-restful
 flask-mysqldb
 mysql-connector-python
 python-dotenv
