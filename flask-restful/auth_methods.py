@@ -1,8 +1,9 @@
 from functools import wraps
 from flask import request
 
+
 def access_denied():
-    return {'error_message': 'Invalid API key'}, 401
+    return {'error_message': 'Not correct credentials'}, 401
 
 
 def admin_verify(admin_api_key: str):
@@ -13,9 +14,9 @@ def admin_verify(admin_api_key: str):
         return False
 
 
-def verify(api_key: str):
+def verify(login: str):
     # To-Do: Implement verification via db
-    if api_key == 'test':
+    if login == 'test':
         return True
     else:
         return False
