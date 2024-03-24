@@ -1,11 +1,14 @@
 from flask import Flask
-from flask_restful import Resource, Api
+from flask_restful import Resource, Api, reqparse
+from auth_methods import admin_auth, auth
 
 app = Flask(__name__)
 api = Api(app)
 
 
 class HelloWorld(Resource):
+    method_decorators = [auth]
+
     def get(self):
         return {'hello': 'world'}
 
