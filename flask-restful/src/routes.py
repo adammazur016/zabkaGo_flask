@@ -1,39 +1,33 @@
 from flask import Blueprint
 from .auth_methods import auth, admin_auth
-from . import mysql
+import mysql.connector
+from . import config
 from .endpoints import login
 
 # main blueprint to be registered with application
 api_bp = Blueprint('api', __name__)
 
-def getPointsFromDb():
 
-    # Creating a connection cursor
-    cursor = mysql.connection.cursor()
-
-    # Executing SQL Statements
-    query = "SELECT places.ID, places.lat, places.long FROM places"
-
-    print(f'The query is: {query}')
-
-    cursor.execute(query)
-
-    data = cursor.fetchall()
-
+# TO-DO: Move to new endpoint
+def get_points_from_db():
     places = []
+    # Creating a connection cursor
+    with mysql.connector.connect(**config.MYSQL_CONFIG) as cnx:
+        with cnx.cursor() as cursor:
+            # Executing SQL Statements
+            query = "SELECT places.ID, places.lat, places.long FROM places"
 
-    for place in data:
-        placeID = place[0]
-        placeLat = place[1]
-        placeLong = place[2]
-        places.append({'place_id': placeID, 'latitude': placeLat, 'longitude': placeLong})
+            print(f'The query is: {query}')
 
+            cursor.execute(query)
 
-    # Saving the Actions performed on the DB
-    #mysql.connection.commit()
+            data = cursor.fetchall()
 
-    # Closing the cursor
-    cursor.close()
+            for place in data:
+                place_id = place[0]
+                place_lat = place[1]
+                place_long = place[2]
+                places.append({'place_id': place_id, 'latitude': place_lat, 'longitude': place_long})
 
     return places
 
@@ -41,7 +35,7 @@ def getPointsFromDb():
 @api_bp.route('/test', methods=['POST'])
 @auth
 def test():
-    places = getPointsFromDb()
+    places = get_points_from_db()
     return places
 
 

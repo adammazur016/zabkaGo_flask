@@ -1,5 +1,6 @@
 from flask import request, Blueprint
-from .. import mysql
+from .. import config
+import mysql.connector
 
 login_endpoint = Blueprint('login', __name__)
 
@@ -12,38 +13,25 @@ def simple_test(user: str, password: str):
         return False
 
 
-def testDatabase(user, password):
-
+# TO-DO: Split comparing password and receiving user api_key to separate queries
+def get_password(user):
     # TO-DO: Secure it from SQL injection
     myLogin = "'" + user + "'"
-    myPass = "'" + password + "'"
-    # Creating a connection cursor
-    cursor = mysql.connection.cursor()
+    result = []
+    with mysql.connector.connect(**config.MYSQL_CONFIG) as cnx:
+        with cnx.cursor() as cursor:
+            # Executing SQL Statements
 
-    # Executing SQL Statements
+            query = "SELECT password, id, api_key FROM users WHERE login = " + myLogin
 
-    query = "SELECT password, id, api_key FROM users WHERE login = " + myLogin
+            cursor.execute(query)
+            data = cursor.fetchall()
 
-    print(f'The query is: {query}')
+            correct_password = data[0][0]
+            user_id = data[0][1]
+            user_api_key = data[0][2]
 
-    cursor.execute(query)
-
-    data = cursor.fetchall()
-
-    correctPassword = data[0][0]
-    userId = data[0][1]
-    userApiKey = data[0][2]
-
-    print(f'The password for user {myLogin} is {correctPassword}')
-
-    # Saving the Actions performed on the DB
-   # mysql.connection.commit()
-
-    # Closing the cursor
-    cursor.close()
-
-    result = [correctPassword, userId, userApiKey]
-
+            result = [correct_password, user_id, user_api_key]
     return result
 
 
@@ -52,24 +40,13 @@ def login():
     login = request.args.get('user')
     password = request.args.get('password')
 
-    apiResultDb = testDatabase(login, password)
+    query_result = get_password(login)
 
-    correctPassword = apiResultDb[0]
-    userId = apiResultDb[1]
-    userApiKey = apiResultDb[2]
+    correct_password = query_result[0]
+    user_id = query_result[1]
+    user_api_key = query_result[2]
 
-    if password == correctPassword:
-        return {'auth': '1', 'id': userId, 'api_key': userApiKey}
-    else:
-        return {'auth': '-1'}
-
-
-@login_endpoint.route('/test_login', methods=['POST'])
-def test_login():
-    user = request.args.get('user')
-    password = request.args.get('password')
-
-    if simple_test(user, password):
-        return {'auth': '1', 'id': 0, 'api_key': 12345}
+    if password == correct_password:
+        return {'auth': '1', 'id': user_id, 'api_key': user_api_key}
     else:
         return {'auth': '-1'}

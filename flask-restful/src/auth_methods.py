@@ -1,6 +1,6 @@
 from functools import wraps
 from flask import request
-from . import mysql
+from . import config
 import mysql.connector
 
 
@@ -17,18 +17,15 @@ def admin_verify(admin_api_key: str):
 
 
 def verify(api_key: str):
-    mydb = mysql.connector.connect()
+    with mysql.connector.connect(**config.MYSQL_CONFIG) as cnx:
+        with cnx.cursor() as cursor:
+            cursor.execute("SELECT count(api_key) AS number FROM users WHERE api_key = '"+api_key + "'")
+            result = cursor.fetchall()
 
-    mycursor = mydb.cursor()
+            if result[0][0] == 1:
+                return True
 
-    mycursor.execute("SELECT count(api_key) AS number FROM users WHERE api_key = '"+api_key + "'")
-
-    myresult = mycursor.fetchall()
-
-    if myresult[0][0] == 1:
-         return True
-
-    return False
+            return False
 
 
 def admin_auth(func):
