@@ -9,10 +9,6 @@ blinker==1.7.0
 click==8.1.7
     # via flask
 flask==3.0.2
-    # via
-    #   -r requirements.in
-    #   flask-mysqldb
-flask-mysqldb==2.0.0
     # via -r requirements.in
 itsdangerous==2.1.2
     # via flask
@@ -24,8 +20,6 @@ markupsafe==2.1.5
     #   werkzeug
 mysql-connector-python==8.3.0
     # via -r requirements.in
-mysqlclient==2.2.4
-    # via flask-mysqldb
 python-dotenv==1.0.1
     # via -r requirements.in
 werkzeug==3.0.1
