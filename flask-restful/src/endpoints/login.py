@@ -14,8 +14,8 @@ def get_session_token(user):
 
             cursor.execute(query)
             data = cursor.fetchall()
-
             session_token = data[0][0]
+
     return session_token
 
 

@@ -2,7 +2,7 @@ from flask import Blueprint
 from .auth_methods import auth, admin_auth
 import mysql.connector
 from . import config
-from .endpoints import login
+from .endpoints import login, register
 
 # main blueprint to be registered with application
 api_bp = Blueprint('api', __name__)
@@ -41,3 +41,4 @@ def test():
 
 # Register endpoint blueprints
 api_bp.register_blueprint(login.login_endpoint)
+api_bp.register_blueprint(register.register_endpoint)
