@@ -5,48 +5,46 @@ import mysql.connector
 login_endpoint = Blueprint('login', __name__)
 
 
-def simple_test(user: str, password: str):
-    print(f"{user} {password}")
-    if user == 'test' and password == 'test123':
-        return True
-    else:
-        return False
-
-
-# TO-DO: Split comparing password and receiving user api_key to separate queries
-def get_password(user):
-    # TO-DO: Secure it from SQL injection
-    myLogin = "'" + user + "'"
-    result = []
+def get_session_token(user):
+    user = "'" + user + "'"
     with mysql.connector.connect(**config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
             # Executing SQL Statements
+            query = "SELECT api_key FROM users WHERE login = " + user
 
-            query = "SELECT password, id, api_key FROM users WHERE login = " + myLogin
+            cursor.execute(query)
+            data = cursor.fetchall()
+
+            session_token = data[0][0]
+    return session_token
+
+
+def get_password(user):
+    # TO-DO: Secure it from SQL injection
+    user = "'" + user + "'"
+    with mysql.connector.connect(**config.MYSQL_CONFIG) as cnx:
+        with cnx.cursor() as cursor:
+            # Executing SQL Statements
+            query = "SELECT password FROM users WHERE login = " + user
 
             cursor.execute(query)
             data = cursor.fetchall()
 
             correct_password = data[0][0]
-            user_id = data[0][1]
-            user_api_key = data[0][2]
 
-            result = [correct_password, user_id, user_api_key]
-    return result
+    return correct_password
 
 
 @login_endpoint.route('/login', methods=['POST'])
 def login():
-    login = request.args.get('user')
+    user = request.args.get('user')
     password = request.args.get('password')
+    session_token = None
 
-    query_result = get_password(login)
+    if password == get_password(user):
+        session_token = get_session_token(user)
 
-    correct_password = query_result[0]
-    user_id = query_result[1]
-    user_api_key = query_result[2]
-
-    if password == correct_password:
-        return {'auth': '1', 'id': user_id, 'api_key': user_api_key}
+    if session_token:
+        return {'status': 'success', 'session_token': session_token}
     else:
-        return {'auth': '-1'}
+        return {'status': 'fail'}
