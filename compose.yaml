@@ -2,6 +2,13 @@ services:
   flask:
     build: ./flask-restful
     restart: always
+    develop:
+      watch:
+        - action: rebuild
+          path: ./flask-restful/requirements.txt
+        - action: sync
+          path: ./flask-restful
+          target: /app
     networks:
       - default
     ports:
