@@ -1,6 +1,7 @@
 from flask import request, Blueprint
 from app.src import app_config
 import mysql.connector
+from app.src.auth_methods import hash_password
 
 register_endpoint = Blueprint('register', __name__)
 
@@ -31,12 +32,11 @@ def check_password_validity(password):
 
 # TO-DO: Password hashing
 def add_user(username, password):
-    username = "'" + username + "'"
-    password = "'" + password + "'"
+    password = hash_password(password)
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
             query = f"INSERT INTO `users` (`login`, `password`, `api_key`) VALUES \
-                        ({username}, {password}, 'asdftest')"
+                        ('{username}', '{password}', '')"
             cursor.execute(query)
         cnx.commit()
 

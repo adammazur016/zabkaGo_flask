@@ -1,5 +1,6 @@
 from flask import request, Blueprint
 from app.src import app_config
+from app.src.auth_methods import hash_password
 import mysql.connector
 import base64
 import os
@@ -50,7 +51,7 @@ def login():
     password = request.args.get('password')
     session_token = None
 
-    if password == get_password(user):
+    if hash_password(password) == get_password(user):
         session_token = create_session_token(user)
 
     if session_token:

@@ -2,6 +2,17 @@ from functools import wraps
 from flask import request
 from app.src import app_config
 import mysql.connector
+import hashlib
+
+
+def hash_password(password):
+    # Konwertuj hasło na bajty (utf-8)
+    password_bytes = password.encode('utf-8')
+
+    # Użyj funkcji SHA-256 do zahashowania hasła
+    hashed_password = hashlib.sha256(password_bytes).hexdigest()
+
+    return hashed_password
 
 
 def access_denied():
