@@ -1,5 +1,5 @@
 from flask import request, Blueprint
-from .. import config
+from app.src import app_config
 import mysql.connector
 
 register_endpoint = Blueprint('register', __name__)
@@ -12,7 +12,7 @@ def check_username_validity(username):
 
     # Check if username is taken
     username = "'" + username + "'"
-    with mysql.connector.connect(**config.MYSQL_CONFIG) as cnx:
+    with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
             query = f"SELECT EXISTS(SELECT * FROM users WHERE login = {username})"
             cursor.execute(query)
@@ -33,7 +33,7 @@ def check_password_validity(password):
 def add_user(username, password):
     username = "'" + username + "'"
     password = "'" + password + "'"
-    with mysql.connector.connect(**config.MYSQL_CONFIG) as cnx:
+    with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
             query = f"INSERT INTO `users` (`login`, `password`, `api_key`) VALUES \
                         ({username}, {password}, 'asdftest')"

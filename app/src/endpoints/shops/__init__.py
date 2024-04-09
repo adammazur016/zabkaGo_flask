@@ -1,17 +1,17 @@
 from flask import request, Blueprint
-from .. import config
+from app.src import app_config
 import mysql.connector
-from datetime import date
-from ..auth_methods import auth
+from app.src.auth_methods import auth
+from app.src.endpoints.shops import visit
 
-get_points_endpoint = Blueprint('getpoints', __name__)
+shops_endpoint = Blueprint('shops', __name__)
 
-def get_points_from_db():
+
+def get_shops_query():
     places = []
 
-    with mysql.connector.connect(**config.MYSQL_CONFIG) as cnx:
+    with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
-            
             query = "SELECT places.ID, places.lat, places.long FROM places"
 
             print(f'The query is: {query}')
@@ -29,16 +29,14 @@ def get_points_from_db():
     return places
 
 
-@get_points_endpoint.route('/getpoints', methods=['GET'])
+@shops_endpoint.route('', methods=['GET'])
 @auth
-def get_points():
-    places = get_points_from_db()
+def get_shops():
+    places = get_shops_query()
     return places
 
 
-
-
-
-
-
+shops_endpoint.url_prefix = '/shops'
+shops_endpoint.register_blueprint(visit.make_visit_endpoint)
+shops_endpoint.register_blueprint(visit.check_visit_endpoint)
 
