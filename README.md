@@ -12,7 +12,7 @@ Database should be initialized with default tables and application should be rea
 * Default flask address: http://0.0.0.0:5000
 * Default phpmyadmin address: http://0.0.0.0:8080
 * Default database address: 0.0.0.0:3306
-* Default Swagger API documentation: http://0.0.0.0/swagger
+* Default Swagger API documentation: http://0.0.0.0:5000/swagger
 
 ## Restarting database initialization
 Database initializes only during first start. Data is persistent and won't reinitialize until volume is deleted.
