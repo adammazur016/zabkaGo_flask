@@ -2,7 +2,7 @@ from flask import request, Blueprint
 from app.src import app_config
 import mysql.connector
 from datetime import date
-from app.src.auth_methods import auth
+from app.src.query_methods import auth
 
 users_endpoint = Blueprint('users', __name__)
 

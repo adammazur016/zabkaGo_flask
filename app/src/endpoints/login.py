@@ -1,6 +1,6 @@
-from flask import request, Blueprint
+from flask import request, Blueprint, jsonify
 from app.src import app_config
-from app.src.auth_methods import hash_password
+from app.src.query_methods import hash_password, requires
 import mysql.connector
 import base64
 import os
@@ -8,11 +8,20 @@ import os
 login_endpoint = Blueprint('login', __name__)
 
 
-def generate_session_token(length=32):
+def generate_session_token(length=128):
     random_bytes = os.urandom(length)
     base64_encoded = base64.urlsafe_b64encode(random_bytes).decode('utf-8')
 
     return base64_encoded
+
+
+def user_exists(username):
+    with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
+        with cnx.cursor() as cursor:
+            query = f"SELECT EXISTS(SELECT * FROM users WHERE login = '{username}')"
+            cursor.execute(query)
+            exists = cursor.fetchone()[0]
+    return exists
 
 
 def create_session_token(user):
@@ -29,16 +38,19 @@ def create_session_token(user):
     return new_token
 
 
-def get_password(user):
+def get_password(username):
     # TO-DO: Secure it from SQL injection
-    user = "'" + user + "'"
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
             # Executing SQL Statements
-            query = "SELECT password FROM users WHERE login = " + user
+            query = f"SELECT password FROM users WHERE login = '{username}'"
+
+            print(query, flush=True)
 
             cursor.execute(query)
             data = cursor.fetchall()
+
+            print(data, flush=True)
 
             correct_password = data[0][0]
 
@@ -46,15 +58,18 @@ def get_password(user):
 
 
 @login_endpoint.route('/login', methods=['POST'])
+@requires('username', 'password')
 def login():
-    user = request.args.get('user')
+    username = request.args.get('username')
     password = request.args.get('password')
-    session_token = None
 
-    if hash_password(password) == get_password(user):
-        session_token = create_session_token(user)
-
-    if session_token:
-        return {'status': 'success', 'session_token': session_token}
+    # User does not exist, return 'wrong_password' to secure database from leaking valid users
+    if not user_exists(username):
+        return jsonify({'status': 'fail', 'message': 'user_does_not_exist'}), 401
+    # User exists and password is correct, return newly generated session token
+    elif hash_password(password) == get_password(username):
+        session_token = create_session_token(username)
+        return jsonify({'status': 'success', 'session_token': session_token})
+    # Incorrect password
     else:
-        return {'status': 'fail'}
+        return jsonify({'status': 'fail', 'message': 'wrong_password'}), 401

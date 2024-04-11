@@ -1,7 +1,7 @@
-from flask import request, Blueprint
+from flask import request, Blueprint, jsonify
 from app.src import app_config
 import mysql.connector
-from app.src.auth_methods import auth
+from app.src.query_methods import auth
 from app.src.endpoints.shops import visit
 
 shops_endpoint = Blueprint('shops', __name__)
@@ -33,7 +33,7 @@ def get_shops_query():
 @auth
 def get_shops():
     places = get_shops_query()
-    return places
+    return jsonify(places)
 
 
 shops_endpoint.url_prefix = '/shops'

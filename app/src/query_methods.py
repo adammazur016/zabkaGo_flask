@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import request
+from flask import request, jsonify
 from app.src import app_config
 import mysql.connector
 import hashlib
@@ -16,7 +16,7 @@ def hash_password(password):
 
 
 def access_denied():
-    return {'error_message': 'incorrect_credentials'}, 401
+    return {'status': 'fail', 'message': 'no_session_token'}, 401
 
 
 def admin_verify(admin_api_key: str):
@@ -39,10 +39,23 @@ def verify(api_key: str):
             return False
 
 
+def requires(*args, **kwargs):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*wrapped_args, **wrapped_kwargs):
+            query_params = request.args
+            missing_params = [param for param in args if param not in query_params]
+            if missing_params:
+                return jsonify({"status": "fail", "message": "missing_required_parameters", "missing": missing_params}), 400
+            return func(*wrapped_args, **wrapped_kwargs)
+        return wrapper
+    return decorator
+
+
 def admin_auth(func):
     @wraps(func)
     def verify_key(*args, **kwargs):
-        if request.args.get('api_key') and admin_verify(request.args.get('api_key')):
+        if request.args.get('session_token') and admin_verify(request.args.get('session_token')):
             return func(*args, **kwargs)
         else:
             return access_denied()
@@ -52,7 +65,7 @@ def admin_auth(func):
 def auth(func):
     @wraps(func)
     def verify_key(*args, **kwargs):
-        if request.args.get('api_key') and verify(request.args.get('api_key')):
+        if request.args.get('session_token') and verify(request.args.get('session_token')):
             return func(*args, **kwargs)
         else:
             return access_denied()
