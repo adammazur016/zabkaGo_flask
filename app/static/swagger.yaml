@@ -1,0 +1,114 @@
+openapi: 3.0.0
+info:
+  title: Zabka Go API
+  description: Backend projektu "Żabka Go" na zaliczenie przedmiotu "Aplikacje Mobilne"
+  version: 0.0.1
+servers:
+  - url: http://127.0.0.1:5000/v1/
+    description: Local development server
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: query
+      name: session_token
+paths:
+  /login:
+    post:
+      summary: Authenticates user.
+      description: Takes username and password, compares given password with database then, if it matches,
+                  generates new session token and returns it to user.
+      parameters:
+        - in: query
+          name: username
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: password
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session_token:
+                    type: string
+                    example: abcdefABCDEF123456789ghjklGHJKLxyzXYZabcABC=
+                  status:
+                    type: string
+                    example: success
+        '401':
+          description: Wrong password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: wrong_password
+                  status:
+                    type: string
+                    example: fail
+  /register:
+    post:
+      summary: Creates new user.
+      description: Takes username and password, verifies their validity and creates new user after passing all checks.
+      parameters:
+        - in: query
+          name: username
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: password
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+        '400':
+          description: Registration failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: username_taken
+                  status:
+                    type: string
+                    example: fail
+  /shops:
+    get:
+      summary: Returns list of all Zabka shops.
+      description:
+      parameters:
+      responses:
+  /shops/visit/{shop_id}:
+    post:
+      summary: Sends information about shop visit.
+      parameters:
+      responses:
+    get:
+      summary: Gets information whenever visiting shop is valid or invalid.
+      parameters:
+      security:
+        - ApiKeyAuth: []
+      responses:
