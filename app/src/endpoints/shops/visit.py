@@ -4,8 +4,7 @@ from datetime import date
 from app.src.query_methods import auth, requires
 from app.src import app_config
 
-make_visit_endpoint = Blueprint('make_visit', __name__)
-check_visit_endpoint = Blueprint('check_visit', __name__)
+visit_endpoint = Blueprint('visit', __name__)
 
 
 def mark_visit_query(api_key, shop_id):
@@ -39,7 +38,7 @@ def check_visit_query(api_key, shop_id):
     return {'status': 'visit_possible'}
 
 
-@make_visit_endpoint.route('/<shop_id>/visit', methods=['POST'])
+@visit_endpoint.route('/<shop_id>/visit', methods=['POST'])
 @auth
 @requires("session_token")
 def make_visit(shop_id):
@@ -49,7 +48,7 @@ def make_visit(shop_id):
     return jsonify(query_result)
 
 
-@check_visit_endpoint.route('/<shop_id>/visit', methods=['GET'])
+@visit_endpoint.route('/<shop_id>/visit', methods=['GET'])
 @auth
 @requires("session_token")
 def check_visit(shop_id):

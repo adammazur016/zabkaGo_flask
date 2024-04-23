@@ -29,14 +29,20 @@ def get_shops_query():
     return places
 
 
-@shops_endpoint.route('', methods=['GET'])
+# This probably needs optimization to not return ALL shops
+@shops_endpoint.route('/shops', methods=['GET'])
 @auth
 def get_shops():
     places = get_shops_query()
     return jsonify(places)
 
 
-shops_endpoint.url_prefix = '/shops'
-shops_endpoint.register_blueprint(visit.make_visit_endpoint)
-shops_endpoint.register_blueprint(visit.check_visit_endpoint)
+@shops_endpoint.route('/shops', methods=['GET'])
+@auth
+def get_shops():
+    places = get_shops_query()
+    return jsonify(places)
+
+
+shops_endpoint.register_blueprint(visit.visit_endpoint)
 
