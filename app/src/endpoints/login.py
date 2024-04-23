@@ -46,12 +46,8 @@ def get_password(username):
             # Executing SQL Statements
             query = f"SELECT password FROM users WHERE login = '{username}'"
 
-            print(query, flush=True)
-
             cursor.execute(query)
             data = cursor.fetchall()
-
-            print(data, flush=True)
 
             correct_password = data[0][0]
 
