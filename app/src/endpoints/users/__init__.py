@@ -22,6 +22,22 @@ def get_users(count: int):
     return users_data
 
 
+def get_user(user_id: int):
+    user_data = {}
+    with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
+        with cnx.cursor() as cursor:
+            # Executing SQL Statements
+            # Replace login with display name later
+            query = f"SELECT login, rank_points FROM users where id = {user_id}"
+            cursor.execute(query)
+            data = cursor.fetchall()
+            if data:
+                user_data = {"name": data[0][0], "points": data[0][1]}
+            else:
+                return {}
+    return user_data
+
+
 @users_endpoint.route('/users', methods=['GET'])
 def return_users():
     # TO-DO: Argument validation
@@ -29,6 +45,15 @@ def return_users():
     if request.args.get('count'):
         count = request.args.get('count')
     return jsonify(get_users(count))
+
+
+@users_endpoint.route('/user/<user_id>', methods=['GET'])
+def return_user(user_id):
+    user_data = get_user(user_id)
+    if user_data:
+        return jsonify(user_data), 200
+    else:
+        return jsonify({'status': 'fail', 'message': 'user_not_found'}), 404
 
 
 def add_rank_point(api_key):
