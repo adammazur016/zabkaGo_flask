@@ -28,6 +28,7 @@ def create_session_token(user):
     new_token = generate_session_token()
 
     # Save new token in database
+    # TO-DO: Handle query error in very (very) rare case of generating duplicate session token
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
             # Executing SQL Statements
