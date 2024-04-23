@@ -14,11 +14,11 @@ def get_users(count: int):
         with cnx.cursor() as cursor:
             # Executing SQL Statements
             # Replace login with display name later
-            query = f"SELECT login, rank_points FROM users ORDER BY rank_points DESC LIMIT {count}"
+            query = f"SELECT id, login, rank_points FROM users ORDER BY rank_points DESC LIMIT {count}"
             cursor.execute(query)
             data = cursor.fetchall()
             for user in data:
-                users_data.append({"name": user[0], "points": user[1]})
+                users_data.append({"id": user[0], "name": user[1], "points": user[2]})
     return users_data
 
 
@@ -28,11 +28,11 @@ def get_user(user_id: int):
         with cnx.cursor() as cursor:
             # Executing SQL Statements
             # Replace login with display name later
-            query = f"SELECT login, rank_points FROM users where id = {user_id}"
+            query = f"SELECT id, login, rank_points FROM users where id = {user_id}"
             cursor.execute(query)
             data = cursor.fetchall()
             if data:
-                user_data = {"name": data[0][0], "points": data[0][1]}
+                user_data = {"id": data[0][0], "name": data[0][1], "points": data[0][2]}
             else:
                 return {}
     return user_data
