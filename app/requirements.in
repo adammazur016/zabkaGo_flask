@@ -2,4 +2,3 @@ flask
 mysql-connector-python
 python-dotenv
 flask_swagger_ui
-pyment

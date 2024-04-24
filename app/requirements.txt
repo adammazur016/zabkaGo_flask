@@ -24,8 +24,6 @@ markupsafe==2.1.5
     #   werkzeug
 mysql-connector-python==8.3.0
     # via -r requirements.in
-pyment==0.3.3
-    # via -r requirements.in
 python-dotenv==1.0.1
     # via -r requirements.in
 werkzeug==3.0.1
