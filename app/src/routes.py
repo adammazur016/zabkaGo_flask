@@ -1,7 +1,7 @@
 from flask import Blueprint
 from app.src.endpoints import login, register, shops, users, achievements
 
-# main blueprint to be registered with application
+# Main blueprint with application
 api_bp = Blueprint('api', __name__)
 
 

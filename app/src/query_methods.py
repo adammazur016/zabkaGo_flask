@@ -5,32 +5,42 @@ import mysql.connector
 import hashlib
 
 
-def hash_password(password):
-    # Konwertuj hasło na bajty (utf-8)
+def hash_password(password: str):
+    """
+    Hashes password using sha256 algorithm.
+    """
+    # Convert password to bytes encoded in utf-8
     password_bytes = password.encode('utf-8')
 
-    # Użyj funkcji SHA-256 do zahashowania hasła
+    # Hash password with sha256
     hashed_password = hashlib.sha256(password_bytes).hexdigest()
 
     return hashed_password
 
 
 def access_denied():
+    """ Default response when trying to access authentication protected endpoint with no valid session token. """
     return {'status': 'fail', 'message': 'no_session_token'}, 401
 
 
 def admin_verify(admin_api_key: str):
-    # To-Do: Implement verification via db
+    """
+    At this moment it's unused method of authorization in endpoints reserved for admins.
+    TODO: Implement verification via db // Currently unnecessary
+    """
     if admin_api_key == 'test':
         return True
     else:
         return False
 
 
-def verify(api_key: str):
+def verify(session_token: str):
+    """
+    (Part of @auth decorator) Checks if given session token is valid.
+    """
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
-            cursor.execute("SELECT count(api_key) AS number FROM users WHERE api_key = '"+api_key + "'")
+            cursor.execute(f"SELECT count(api_key) AS number FROM users WHERE api_key = '{session_token}'")
             result = cursor.fetchall()
 
             if result[0][0] == 1:
@@ -40,6 +50,10 @@ def verify(api_key: str):
 
 
 def requires(*args, **kwargs):
+    """
+    Decorator which checks if specified parameters were passed in request.
+    If they are missing, it automatically returns error 400 with missing parameters and prevents execution of wrapped function.
+    """
     def decorator(func):
         @wraps(func)
         def wrapper(*wrapped_args, **wrapped_kwargs):
@@ -53,6 +67,10 @@ def requires(*args, **kwargs):
 
 
 def admin_auth(func):
+    """
+    Decorator used in endpoints requiring admin authorization.
+    Currently unused.
+    """
     @wraps(func)
     def verify_key(*args, **kwargs):
         if request.args.get('session_token') and admin_verify(request.args.get('session_token')):
@@ -63,6 +81,10 @@ def admin_auth(func):
 
 
 def auth(func):
+    """
+    Decorator used in endpoints requiring normal authorization.
+    Checks existence of session_token parameter in request, then verifies if it's valid.
+    """
     @wraps(func)
     def verify_key(*args, **kwargs):
         if request.args.get('session_token') and verify(request.args.get('session_token')):
@@ -70,3 +92,5 @@ def auth(func):
         else:
             return access_denied()
     return verify_key
+
+# TODO: Add input sanitization decorator

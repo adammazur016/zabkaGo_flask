@@ -7,7 +7,10 @@ load_dotenv()
 
 
 class Config:
-    # Load default config and replace all variables found in .env
+    """
+    Contains all configuration variables.
+    Loads default config then replaces it with all variables found in .env.
+    """
     def __init__(self):
         self.config = DefaultConfig()
         # Flask Part

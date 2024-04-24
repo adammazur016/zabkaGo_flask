@@ -1,4 +1,7 @@
 class DefaultConfig:
+    """
+    Default configuration, in case .env variables are missing.
+    """
     def __init__(self):
         # App
         self.APP_NAME = "Zabka Go"

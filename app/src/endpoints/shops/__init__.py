@@ -1,15 +1,19 @@
-from flask import request, Blueprint, jsonify
+import flask
+from flask import Blueprint, jsonify
 from app.src import app_config
 import mysql.connector
-from app.src.query_methods import auth
 from app.src.endpoints.shops import visit
 
 shops_endpoint = Blueprint('shops', __name__)
 
 
-def get_shops():
-    places = []
+def get_shops() -> list[dict]:
+    """
+    Looks up all shops in database.
+    :returns: List of shops data represented as dictionary.
+    """
 
+    places = []
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
             query = f"SELECT places.ID, places.lat, places.long, places.name, places.description FROM places"
@@ -26,8 +30,11 @@ def get_shops():
     return places
 
 
-def get_shop(shop_id: int):
-    shop_data = {}
+def get_shop(shop_id: int) -> dict:
+    """
+    Looks up shop with provided id in database
+    :returns: shop data represented as dictionary or empty dict if shop does not exist
+    """
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
             # Executing SQL Statements
@@ -41,23 +48,32 @@ def get_shop(shop_id: int):
                              "long": data[0][2],
                              "name": data[0][3],
                              "description": data[0][4]}
+                return shop_data
             else:
                 return {}
-    return shop_data
 
 
-# This probably needs optimization to not return ALL shops
 @shops_endpoint.route('/shops', methods=['GET'])
-def return_shops():
+def return_shops() -> (flask.Response, int):
+    """ /v1/shops endpoint
+
+    Returns data of all shops
+    TODO: Probably needs optimization in case shop database becomes too big
+    :returns: json serialized response, http status code
+    """
     places = get_shops()
-    return jsonify(places)
+    return jsonify(places), 200
 
 
 @shops_endpoint.route('/shop/<shop_id>', methods=['GET'])
-def return_shop(shop_id):
+def return_shop(shop_id) -> (flask.Response, int):
+    """ /v1/shop/<shop_id> endpoint
+
+    Returns data of shop with provided id
+    :returns: json serialized response, http status code
+    """
     places = get_shop(shop_id)
-    return jsonify(places)
+    return jsonify(places), 200
 
 
 shops_endpoint.register_blueprint(visit.visit_endpoint)
-

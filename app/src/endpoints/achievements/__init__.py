@@ -1,13 +1,17 @@
-from flask import request, Blueprint, jsonify
+import flask
+from flask import Blueprint, jsonify
 import mysql.connector
-from datetime import date
-from app.src.query_methods import auth, requires
 from app.src import app_config
 
 achievements_endpoint = Blueprint('achievements', __name__)
 
 
 def get_achievements():
+    """
+    Looks up all achievements in database.
+    :returns: List of achievements data represented as dictionary.
+    """
+
     achievements_data = []
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
@@ -22,6 +26,10 @@ def get_achievements():
 
 
 def get_achievement(achievement_id: int):
+    """
+    Looks up achievement in database.
+    :returns: Achievement data represented as dictionary.
+    """
     achievement_data = {}
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
@@ -37,25 +45,40 @@ def get_achievement(achievement_id: int):
     return achievement_data
 
 
-@achievements_endpoint.route('/achievement/<id>', methods=['GET'])
-def return_achievement_data(id: int):
-    achievement_data = get_achievement(id)
+@achievements_endpoint.route('/achievement/<achievement_id>', methods=['GET'])
+def return_achievement_data(achievement_id: int) -> (flask.Response, int):
+    """ /v1/achievement/<achievement_id> endpoint
+
+    Returns data of achievement with provided id
+    :returns: json serialized response, http status code
+    """
+    achievement_data = get_achievement(achievement_id)
     if achievement_data:
         return jsonify(achievement_data), 200
     else:
-        return jsonify({'status': 'fail', 'message': 'achievement_not_found'}), 404
+        return jsonify({"status": "fail", "message": "achievement_not_found"}), 404
 
 
 @achievements_endpoint.route('/achievements', methods=['GET'])
-def return_achievements_data():
+def return_achievements_data() -> (flask.Response, int):
+    """ /v1/achievements endpoint
+
+    Returns data of all achievements
+    TODO: Probably needs optimization in case shop database becomes too big
+    :returns: json serialized response, http status code
+    """
     return jsonify(get_achievements())
 
 
-# Needs testing
-def mark_achievement(user_id: int, achievement_id: int):
+def add_achievement(user_id: int, achievement_id: int) -> None:
+    """
+    Mark achievement as acquired by user
+    TODO: Check if achievement was already acquired to avoid duplicates
+    TODO: Testing
+    """
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
             # Executing SQL Statements
-            query = f"INSERT INTO achievements VALUES {user_id}, achievement_id"
+            query = f"INSERT INTO achievements VALUES {user_id}, {achievement_id}"
             cursor.execute(query)
         cnx.commit()
