@@ -1,5 +1,4 @@
-import flask
-from flask import request, Blueprint, jsonify
+from flask import request, Blueprint, jsonify, Response
 from app.src import app_config
 import mysql.connector
 
@@ -48,7 +47,7 @@ def get_user(user_id: int) -> dict:
 
 
 @users_endpoint.route('/users', methods=['GET'])
-def return_users() -> (flask.Response, int):
+def return_users() -> (Response, int):
     """ /v1/users endpoint
 
     Returns data of 'count' number of users
@@ -63,7 +62,7 @@ def return_users() -> (flask.Response, int):
 
 
 @users_endpoint.route('/user/<user_id>', methods=['GET'])
-def return_user(user_id) -> (flask.Response, int):
+def return_user(user_id) -> (Response, int):
     """ /v1/user/<user_id> endpoint
 
     Returns data of user with provided user id.

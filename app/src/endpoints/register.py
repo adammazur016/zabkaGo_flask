@@ -1,5 +1,4 @@
-import flask
-from flask import request, Blueprint, jsonify
+from flask import request, Blueprint, jsonify, Response
 from app.src import app_config
 import mysql.connector
 from app.src.query_methods import hash_password, requires
@@ -56,7 +55,7 @@ def add_user(username, password) -> None:
 
 @register_endpoint.route('/register', methods=['POST'])
 @requires('username', 'password')
-def register() -> (flask.Response, int):
+def register() -> (Response, int):
     """ /v1/register endpoint
 
     Processes user's registration request

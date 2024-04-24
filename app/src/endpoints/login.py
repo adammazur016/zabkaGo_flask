@@ -1,5 +1,4 @@
-import flask
-from flask import request, Blueprint, jsonify
+from flask import request, Blueprint, jsonify, Response
 from app.src import app_config
 from app.src.query_methods import hash_password, requires
 import mysql.connector
@@ -73,7 +72,7 @@ def get_password(username: str) -> str:
 
 @login_endpoint.route('/login', methods=['POST'])
 @requires('username', 'password')
-def login() -> tuple[flask.Response, int]:
+def login() -> tuple[Response, int]:
     """ /v1/login endpoint
 
     Checks if given username and password match with database

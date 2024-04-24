@@ -1,6 +1,5 @@
-from flask import request, Blueprint, jsonify
+from flask import request, Blueprint, jsonify, Response
 import mysql.connector
-from datetime import date
 from app.src.query_methods import auth, requires
 from app.src import app_config
 

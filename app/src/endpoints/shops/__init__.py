@@ -1,5 +1,4 @@
-import flask
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, Response
 from app.src import app_config
 import mysql.connector
 from app.src.endpoints.shops import visit
@@ -54,7 +53,7 @@ def get_shop(shop_id: int) -> dict:
 
 
 @shops_endpoint.route('/shops', methods=['GET'])
-def return_shops() -> (flask.Response, int):
+def return_shops() -> (Response, int):
     """ /v1/shops endpoint
 
     Returns data of all shops
@@ -66,7 +65,7 @@ def return_shops() -> (flask.Response, int):
 
 
 @shops_endpoint.route('/shop/<shop_id>', methods=['GET'])
-def return_shop(shop_id) -> (flask.Response, int):
+def return_shop(shop_id) -> (Response, int):
     """ /v1/shop/<shop_id> endpoint
 
     Returns data of shop with provided id

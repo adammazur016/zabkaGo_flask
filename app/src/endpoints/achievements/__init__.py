@@ -1,5 +1,4 @@
-import flask
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, Response
 import mysql.connector
 from app.src import app_config
 
@@ -46,7 +45,7 @@ def get_achievement(achievement_id: int):
 
 
 @achievements_endpoint.route('/achievement/<achievement_id>', methods=['GET'])
-def return_achievement_data(achievement_id: int) -> (flask.Response, int):
+def return_achievement_data(achievement_id: int) -> (Response, int):
     """ /v1/achievement/<achievement_id> endpoint
 
     Returns data of achievement with provided id
@@ -60,7 +59,7 @@ def return_achievement_data(achievement_id: int) -> (flask.Response, int):
 
 
 @achievements_endpoint.route('/achievements', methods=['GET'])
-def return_achievements_data() -> (flask.Response, int):
+def return_achievements_data() -> (Response, int):
     """ /v1/achievements endpoint
 
     Returns data of all achievements

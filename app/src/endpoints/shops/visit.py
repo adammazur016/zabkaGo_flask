@@ -1,5 +1,4 @@
-import flask
-from flask import request, Blueprint, jsonify
+from flask import request, Blueprint, jsonify, Response
 import mysql.connector
 from datetime import date
 from app.src.query_methods import auth, requires
@@ -49,7 +48,7 @@ def check_visit_query(session_token, shop_id) -> dict:
 @visit_endpoint.route('/shop/<shop_id>/visit', methods=['POST'])
 @auth
 @requires("session_token")
-def make_visit(shop_id) -> (flask.Response, int):
+def make_visit(shop_id) -> (Response, int):
     """
     Checks if user is allowed to visit the shop with provided id
     If it is allowed, marks his visit in database
@@ -70,7 +69,7 @@ def make_visit(shop_id) -> (flask.Response, int):
 @visit_endpoint.route('/shop/<shop_id>/visit', methods=['GET'])
 @auth
 @requires("session_token")
-def check_visit(shop_id) -> (flask.Response, int):
+def check_visit(shop_id) -> (Response, int):
     """ /v1/shop/<shop_id>/visit endpoint
 
     Checks if user is allowed to visit the shop with provided id
