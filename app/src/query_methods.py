@@ -1,13 +1,25 @@
 from functools import wraps
-from flask import request, jsonify
+from flask import request, jsonify, Response
 from app.src import app_config
 import mysql.connector
 import hashlib
 
 
-def hash_password(password: str):
+def get_user_id(session_token: str):
+    with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
+        with cnx.cursor() as cursor:
+            cursor.execute(f"SELECT id FROM users WHERE api_key = '{session_token}'")
+            result = cursor.fetchall()
+            if not result:
+                return ''
+            else:
+                return result[0][0]
+
+
+def hash_password(password: str) -> str:
     """
-    Hashes password using sha256 algorithm.
+    Hashes password using sha256 algorithm
+    :returns: hashed password
     """
     # Convert password to bytes encoded in utf-8
     password_bytes = password.encode('utf-8')
@@ -18,14 +30,18 @@ def hash_password(password: str):
     return hashed_password
 
 
-def access_denied():
-    """ Default response when trying to access authentication protected endpoint with no valid session token. """
+def access_denied() -> (Response, int):
+    """
+    Default response when trying to access authentication protected endpoint with no valid session token
+    :returns: prepared response, http status code
+    """
     return {'status': 'fail', 'message': 'no_session_token'}, 401
 
 
-def admin_verify(admin_api_key: str):
+def admin_verify(admin_api_key: str) -> bool:
     """
     At this moment it's unused method of authorization in endpoints reserved for admins.
+    :returns: verification result
     TODO: Implement verification via db // Currently unnecessary
     """
     if admin_api_key == 'test':
@@ -34,18 +50,18 @@ def admin_verify(admin_api_key: str):
         return False
 
 
-def verify(session_token: str):
+def verify(session_token: str) -> bool:
     """
-    (Part of @auth decorator) Checks if given session token is valid.
+    (Part of @auth decorator) Checks if given session token is valid
+    :returns: verification result
+    TODO: Fix query using EXISTS
     """
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
             cursor.execute(f"SELECT count(api_key) AS number FROM users WHERE api_key = '{session_token}'")
             result = cursor.fetchall()
-
             if result[0][0] == 1:
                 return True
-
             return False
 
 
