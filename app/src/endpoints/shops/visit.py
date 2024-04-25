@@ -1,7 +1,7 @@
 from flask import request, Blueprint, jsonify, Response
 import mysql.connector
 from datetime import date
-from app.src.query_methods import auth, requires
+from app.src.query_methods import auth, requires, get_user_id
 from app.src import app_config
 from app.src.endpoints.users import add_rank_point
 
@@ -17,7 +17,8 @@ def mark_visit_query(session_token, shop_id) -> dict:
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
             today_date = date.today().strftime('%Y-%m-%d')
-            query = f"INSERT INTO visits VALUES((SELECT id FROM users WHERE api_key = {session_token}), {shop_id}, {today_date}"
+            user_id = get_user_id(session_token)
+            query = f"INSERT INTO visits VALUES ({user_id}, {shop_id}, '{today_date}')"
             cursor.execute(query)
         cnx.commit()
     return {"status": "success", "message": "visit_marked"}
@@ -31,7 +32,8 @@ def check_visit_query(session_token, shop_id) -> dict:
     """
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
-            query = f"SELECT date FROM visits WHERE user_id = (SELECT id FROM users WHERE api_key = '{session_token}') AND place_id = '{shop_id}' ORDER BY date DESC LIMIT 1;"
+            user_id = get_user_id(session_token)
+            query = f"SELECT date FROM visits WHERE user_id = {user_id} AND place_id = {shop_id} ORDER BY date DESC LIMIT 1;"
             cursor.execute(query)
             query_result = cursor.fetchall()
             # There is no information that the user ever visited the shop, it will be his first visit
@@ -58,7 +60,7 @@ def make_visit(shop_id) -> (Response, int):
     session_token = request.args.get("session_token")
     # Check if visit is allowed
     check_query_result = check_visit_query(session_token, shop_id)
-    if check_query_result["status"] == "failed":
+    if check_query_result["status"] == "fail":
         return jsonify(check_query_result), 403
 
     mark_query_result = mark_visit_query(session_token, shop_id)
@@ -76,8 +78,8 @@ def check_visit(shop_id) -> (Response, int):
     Requires authentication and identifies user based on session token
     :returns: json serialized response, http status code
     """
-    api_key = request.args.get("session_token")
-    query_result = check_visit_query(api_key, shop_id)
+    session_token = request.args.get("session_token")
+    query_result = check_visit_query(session_token, shop_id)
 
     # Status code 200 if visit is allowed, 403 if forbidden
     if query_result["status"] == "success":

@@ -71,8 +71,8 @@ def return_shop(shop_id) -> (Response, int):
     Returns data of shop with provided id
     :returns: json serialized response, http status code
     """
-    places = get_shop(shop_id)
-    return jsonify(places), 200
+    shop = get_shop(shop_id)
+    return jsonify(shop), 200
 
 
 shops_endpoint.register_blueprint(visit.visit_endpoint)
