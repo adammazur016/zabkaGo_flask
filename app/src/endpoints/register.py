@@ -42,12 +42,11 @@ def check_password_validity(password) -> (bool, str, int):
 def add_user(username, password) -> None:
     """
     Adds user to database
-    TODO: Error handling (error is unlikely but just to be safe)
     """
     password = hash_password(password)
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
-            query = f"INSERT INTO `users` (`login`, `password`, `api_key`) VALUES \
+            query = f"INSERT INTO `users` (`login`, `password`, `session_token`) VALUES \
                         ('{username}', '{password}', '')"
             cursor.execute(query)
         cnx.commit()

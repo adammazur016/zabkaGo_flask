@@ -8,7 +8,7 @@ import hashlib
 def get_user_id(session_token: str):
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
-            cursor.execute(f"SELECT id FROM users WHERE api_key = '{session_token}'")
+            cursor.execute(f"SELECT id FROM users WHERE session_token = '{session_token}'")
             result = cursor.fetchall()
             if not result:
                 return ''
@@ -54,15 +54,16 @@ def verify(session_token: str) -> bool:
     """
     (Part of @auth decorator) Checks if given session token is valid
     :returns: verification result
-    TODO: Fix query using EXISTS
     """
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
-            cursor.execute(f"SELECT count(api_key) AS number FROM users WHERE api_key = '{session_token}'")
-            result = cursor.fetchall()
-            if result[0][0] == 1:
-                return True
-            return False
+            query = f"SELECT EXISTS(SELECT * FROM users WHERE session_token = '{session_token}')"
+            cursor.execute(query)
+            exists = cursor.fetchone()[0]
+    if exists:
+        return True
+    else:
+        return False
 
 
 def requires(*args, **kwargs):

@@ -19,7 +19,7 @@ def get_users(count: int) -> list[dict]:
         count = MAX_USERS_PER_REQUEST
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
-            query = f"SELECT id, login, rank_points FROM users ORDER BY rank_points DESC LIMIT {count}"
+            query = f"SELECT id, displayed_name, rank_points FROM users ORDER BY rank_points DESC LIMIT {count}"
             cursor.execute(query)
             data = cursor.fetchall()
             for user in data:
@@ -35,8 +35,7 @@ def get_user(user_id: int) -> dict:
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
             # Executing SQL Statements
-            # Replace login with display name later
-            query = f"SELECT id, login, rank_points FROM users where id = {user_id}"
+            query = f"SELECT id, displayed_name, rank_points FROM users where id = {user_id}"
             cursor.execute(query)
             data = cursor.fetchall()
             if data:
@@ -77,13 +76,13 @@ def return_user(user_id) -> (Response, int):
         return jsonify({"status": "fail", "message": "user_not_found"}), 404
 
 
-def add_rank_point(session_token):
+def add_rank_point(session_token, amount=1):
     """
     Adds ranking point to user who owns provided session token
     """
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
             # Executing SQL Statements
-            query = f"UPDATE users SET rank_points = rank_points + 1 WHERE api_key = '{session_token}'"
+            query = f"UPDATE users SET rank_points = rank_points + {amount} WHERE session_token = '{session_token}'"
             cursor.execute(query)
         cnx.commit()

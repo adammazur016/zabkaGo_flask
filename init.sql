@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db:3306
--- Generation Time: Apr 20, 2024 at 04:11 PM
--- Wersja serwera: 8.3.0
--- Wersja PHP: 8.2.8
+-- Generation Time: Apr 30, 2024 at 09:15 AM
+-- Server version: 8.3.0
+-- PHP Version: 8.2.8
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -20,14 +20,13 @@ SET time_zone = "+00:00";
 --
 -- Database: `app_db`
 --
-
-CREATE DATABASE IF NOT EXISTS app_db;
-USE app_db;
+CREATE DATABASE IF NOT EXISTS `app_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+USE `app_db`;
 
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla tabeli `achievements`
+-- Table structure for table `achievements`
 --
 
 CREATE TABLE `achievements` (
@@ -46,7 +45,7 @@ INSERT INTO `achievements` (`id`, `name`, `description`) VALUES
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla tabeli `comments`
+-- Table structure for table `comments`
 --
 
 CREATE TABLE `comments` (
@@ -54,13 +53,14 @@ CREATE TABLE `comments` (
   `user_id` int NOT NULL,
   `place_id` int NOT NULL,
   `text_content` varchar(255) NOT NULL,
-  `main_id` int DEFAULT NULL
+  `parent_id` int DEFAULT NULL,
+  `creation_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla tabeli `likes`
+-- Table structure for table `likes`
 --
 
 CREATE TABLE `likes` (
@@ -71,7 +71,7 @@ CREATE TABLE `likes` (
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla tabeli `places`
+-- Table structure for table `places`
 --
 
 CREATE TABLE `places` (
@@ -87,42 +87,30 @@ CREATE TABLE `places` (
 --
 
 INSERT INTO `places` (`id`, `long`, `lat`, `name`, `description`) VALUES
-(1, 12, 13, 'zabka', 'pilsudskiego'),
-(2, 17.615812, 50.754552, 'zabkatestdb', ''),
-(3, 17.616051, 50.754149, 'test3', ''),
-(4, 17.015884034062445, 51.0940211383086, 'Test6', 'Zaporoska 42A, 53-416 Wrocław'),
-(5, 17.613560460684557, 50.754277918741785, 'zabka', 'Moniuszki 59, 49-340 Lewin Brzeski'),
-(6, 17.615609668247327, 50.751976875524704, 'zabka', 'Kościuszki 37D, 49-340 Lewin Brzeski'),
-(7, 17.617025112052747, 50.74918563321704, 'zabka', 'Rynek 3-8/LOK. A, 49-340 Lewin Brzeski'),
-(8, 16.9953893, 51.12446, 'Żabka/ mieszkanie ', 'Testydgdg ');
+(1, 17.015884034062445, 51.0940211383086, 'Test6', 'Zaporoska 42A, 53-416 Wrocław'),
+(2, 17.613560460684557, 50.754277918741785, 'zabka', 'Moniuszki 59, 49-340 Lewin Brzeski'),
+(3, 17.615609668247327, 50.751976875524704, 'zabka', 'Kościuszki 37D, 49-340 Lewin Brzeski'),
+(4, 17.617025112052747, 50.74918563321704, 'zabka', 'Rynek 3-8/LOK. A, 49-340 Lewin Brzeski');
 
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla tabeli `users`
+-- Table structure for table `users`
 --
 
 CREATE TABLE `users` (
   `id` int NOT NULL,
+  `displayed_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `login` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `api_key` varchar(255) NOT NULL,
+  `session_token` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `rank_points` int NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `users`
---
-
-INSERT INTO `users` (`id`, `login`, `password`, `api_key`, `rank_points`) VALUES
-(1, 'adam', 'zaq1@WSX', 'adasdsad', 1),
-(8, 'test', 'test', '12345', 0),
-(11, 'adam12', '123', '12345adamapi', 21);
 
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla tabeli `users_achievements`
+-- Table structure for table `users_achievements`
 --
 
 CREATE TABLE `users_achievements` (
@@ -130,17 +118,10 @@ CREATE TABLE `users_achievements` (
   `achievement_id` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Dumping data for table `users_achievements`
---
-
-INSERT INTO `users_achievements` (`user_id`, `achievement_id`) VALUES
-(11, 1);
-
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla tabeli `visits`
+-- Table structure for table `visits`
 --
 
 CREATE TABLE `visits` (
@@ -150,61 +131,54 @@ CREATE TABLE `visits` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data for table `visits`
---
-
-INSERT INTO `visits` (`user_id`, `place_id`, `date`) VALUES
-(11, 5, '2024-04-08'),
-(11, 3, '2024-04-10');
-
---
--- Indeksy dla zrzutów tabel
+-- Indexes for dumped tables
 --
 
 --
--- Indeksy dla tabeli `achievements`
+-- Indexes for table `achievements`
 --
 ALTER TABLE `achievements`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indeksy dla tabeli `comments`
+-- Indexes for table `comments`
 --
 ALTER TABLE `comments`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`,`place_id`,`main_id`),
-  ADD KEY `place_id` (`place_id`);
+  ADD KEY `user_id` (`user_id`,`place_id`,`parent_id`),
+  ADD KEY `place_id` (`place_id`),
+  ADD KEY `parent_id` (`parent_id`);
 
 --
--- Indeksy dla tabeli `likes`
+-- Indexes for table `likes`
 --
 ALTER TABLE `likes`
   ADD KEY `user_id` (`user_id`,`comment_id`),
   ADD KEY `comment_id` (`comment_id`);
 
 --
--- Indeksy dla tabeli `places`
+-- Indexes for table `places`
 --
 ALTER TABLE `places`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indeksy dla tabeli `users`
+-- Indexes for table `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `login` (`login`,`api_key`),
+  ADD UNIQUE KEY `login` (`login`,`session_token`),
   ADD UNIQUE KEY `login_2` (`login`);
 
 --
--- Indeksy dla tabeli `users_achievements`
+-- Indexes for table `users_achievements`
 --
 ALTER TABLE `users_achievements`
   ADD KEY `user_id` (`user_id`,`achievement_id`),
   ADD KEY `achievement_id` (`achievement_id`);
 
 --
--- Indeksy dla tabeli `visits`
+-- Indexes for table `visits`
 --
 ALTER TABLE `visits`
   ADD KEY `user_id` (`user_id`,`place_id`),
@@ -224,7 +198,7 @@ ALTER TABLE `achievements`
 -- AUTO_INCREMENT for table `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `places`
@@ -236,7 +210,7 @@ ALTER TABLE `places`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- Constraints for dumped tables
@@ -247,7 +221,8 @@ ALTER TABLE `users`
 --
 ALTER TABLE `comments`
   ADD CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`place_id`) REFERENCES `places` (`id`);
+  ADD CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`place_id`) REFERENCES `places` (`id`),
+  ADD CONSTRAINT `comments_ibfk_3` FOREIGN KEY (`parent_id`) REFERENCES `comments` (`id`);
 
 --
 -- Constraints for table `likes`
