@@ -46,8 +46,8 @@ def add_user(username, password) -> None:
     password = hash_password(password)
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
-            query = f"INSERT INTO `users` (`login`, `password`, `session_token`) VALUES \
-                        ('{username}', '{password}', '')"
+            query = f"INSERT INTO `users` (`displayed_name`, `login`, `password`, `session_token`) VALUES \
+                        ('{username}', '{username}', '{password}', '')"
             cursor.execute(query)
         cnx.commit()
 
