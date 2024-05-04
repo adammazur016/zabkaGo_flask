@@ -1,5 +1,5 @@
 from flask import Blueprint
-from app.src.endpoints import login, register, shops, users, achievements, comments
+from src.endpoints import login, register, shops, users, achievements, comments
 
 # Main blueprint with application
 api_bp = Blueprint('api', __name__)

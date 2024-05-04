@@ -1,7 +1,7 @@
 from flask import request, Blueprint, jsonify, Response
 import mysql.connector
-from app.src.query_methods import auth, requires, get_user_id
-from app.src import app_config
+from src.query_methods import auth, requires, get_user_id
+from src import app_config
 
 comment_endpoint = Blueprint('comments', __name__)
 

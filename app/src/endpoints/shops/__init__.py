@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, Response
-from app.src import app_config
+from src import app_config
 import mysql.connector
-from app.src.endpoints.shops import visit
+from src.endpoints.shops import visit
 
 shops_endpoint = Blueprint('shops', __name__)
 

@@ -1,4 +1,4 @@
-from app.src.config.default_config import DefaultConfig
+from src.config.default_config import DefaultConfig
 from dotenv import load_dotenv
 import os
 

@@ -1,7 +1,7 @@
 from flask import request, Blueprint, jsonify, Response
-from app.src import app_config
+from src import app_config
 import mysql.connector
-from app.src.query_methods import hash_password, requires
+from src.query_methods import hash_password, requires
 
 register_endpoint = Blueprint('register', __name__)
 

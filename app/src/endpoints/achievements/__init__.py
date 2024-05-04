@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, Response
 import mysql.connector
-from app.src import app_config
+from src import app_config
 
 achievements_endpoint = Blueprint('achievements', __name__)
 

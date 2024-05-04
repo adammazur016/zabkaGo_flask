@@ -1,6 +1,6 @@
 from functools import wraps
 from flask import request, jsonify, Response
-from app.src import app_config
+from src import app_config
 import mysql.connector
 import hashlib
 
@@ -111,3 +111,4 @@ def auth(func):
     return verify_key
 
 # TODO: Add input sanitization decorator
+# TODO: Add achievement trigger decorator

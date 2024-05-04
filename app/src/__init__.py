@@ -1,5 +1,5 @@
 from flask import Flask
-from app.src.config.config import Config
+from src.config.config import Config
 
 # Generating app's configuration
 app_config = Config().config
@@ -17,5 +17,5 @@ swagger_ui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'ap
 app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
 
 # Register main blueprint
-from app.src.routes import api_bp
+from src.routes import api_bp
 app.register_blueprint(api_bp, url_prefix='/v1')

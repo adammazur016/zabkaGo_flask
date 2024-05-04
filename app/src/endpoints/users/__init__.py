@@ -1,5 +1,5 @@
 from flask import request, Blueprint, jsonify, Response
-from app.src import app_config
+from src import app_config
 import mysql.connector
 
 DEFAULT_USER_COUNT = 50
