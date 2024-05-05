@@ -39,12 +39,29 @@ def check_visit_query(session_token, shop_id) -> dict:
             # There is no information that the user ever visited the shop, it will be his first visit
             if len(query_result) == 0:
                 return {"status": "success", "message": "visit_possible"}
-        cnx.commit()
 
     if date.today() == query_result[0][0]:
         return {"status": "fail", "message": "visit_impossible"}
 
     return {"status": "success", "message": "visit_possible"}
+
+
+def get_user_visits(user_id) -> list[dict]:
+    """
+    Receives list of all visits made by user with provided id from database.
+    :returns: List of all visits made by user
+    """
+    visits = []
+
+    with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
+        with cnx.cursor() as cursor:
+            query = f"SELECT place_id, date FROM visits WHERE user_id = {user_id}"
+            cursor.execute(query)
+            data = cursor.fetchall()
+            # There is no information that the user ever visited the shop, it will be his first visit
+            for visit in data:
+                visits.append({"shop_id": visit[0], "date": visit[1]})
+    return visits
 
 
 @visit_endpoint.route('/shop/<shop_id>/visit', methods=['POST'])
@@ -86,3 +103,19 @@ def check_visit(shop_id) -> (Response, int):
         return jsonify(query_result), 200
     else:
         return jsonify(query_result), 403
+
+
+@visit_endpoint.route('/user/<user_id>/visits', methods=['GET'])
+def check_user_visits(user_id) -> (Response, int):
+    """ /v1/user/<user_id>/visits endpoint
+
+    Returns list of all shops visited by user, including visit date
+    :returns: json serialized response, http status code
+    """
+    user_data = get_user_visits(user_id)
+
+    # Empty user_data -> user was not found or haven't made any visits
+    if user_data:
+        return jsonify(user_data), 200
+    else:
+        return jsonify({"status": "fail", "message": "no_visits_found"}), 404
