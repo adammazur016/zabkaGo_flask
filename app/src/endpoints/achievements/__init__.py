@@ -67,34 +67,3 @@ def return_achievements_data() -> (Response, int):
     :returns: json serialized response, http status code
     """
     return jsonify(get_achievements())
-
-
-def check_achievement_acquisition(user_id: int, achievement_id: int):
-    with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
-        with cnx.cursor() as cursor:
-            # Executing SQL Statements
-            query = f"SELECT EXISTS(SELECT * FROM users_achievements " \
-                    f"WHERE user_id = '{user_id}' AND achievement_id = '{achievement_id}')"
-            cursor.execute(query)
-            is_acquired = cursor.fetchone()[0]
-    if is_acquired:
-        return True
-    else:
-        return False
-
-
-def add_achievement(user_id: int, achievement_id: int) -> None:
-    """
-    Mark achievement as acquired by user
-    TODO: Testing
-    TODO: Automatic check for meeting achievement requirements
-    """
-    if check_achievement_acquisition(user_id, achievement_id):
-        return
-
-    with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
-        with cnx.cursor() as cursor:
-            # Executing SQL Statements
-            query = f"INSERT INTO achievements VALUES {user_id}, {achievement_id}"
-            cursor.execute(query)
-        cnx.commit()

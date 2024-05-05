@@ -4,6 +4,7 @@ from datetime import date
 from src.query_methods import auth, requires, get_user_id
 from src import app_config
 from src.endpoints.users import add_rank_point
+from src import achievements
 
 visit_endpoint = Blueprint('visit', __name__)
 
@@ -29,6 +30,7 @@ def check_visit_query(session_token, shop_id) -> dict:
     Checks if user is allowed to visit the shop with provided id
     Identifies user based on session token
     :returns: response ready for json serialization
+    TODO: Check if shop_id exists
     """
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
@@ -79,9 +81,15 @@ def make_visit(shop_id) -> (Response, int):
     check_query_result = check_visit_query(session_token, shop_id)
     if check_query_result["status"] == "fail":
         return jsonify(check_query_result), 403
-
+    # Mark visit
     mark_query_result = mark_visit_query(session_token, shop_id)
+    # Add ranked points
     add_rank_point(session_token)
+    # Check if visit resulted in new achievement
+    possible_achievements = achievements.VisitCountAchievements + achievements.PointCountAchievements
+    achievements.check_triggers(user_id=get_user_id(session_token),
+                                achievements=possible_achievements)
+    # Send reply
     return jsonify(mark_query_result), 200
 
 
