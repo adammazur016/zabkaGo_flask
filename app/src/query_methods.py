@@ -111,4 +111,3 @@ def auth(func):
     return verify_key
 
 # TODO: Add input sanitization decorator
-# TODO: Add achievement trigger decorator

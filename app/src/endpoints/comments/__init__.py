@@ -21,6 +21,7 @@ def verify_visit(session_token: str, shop_id: int):
     else:
         return False
 
+
 def verify_comment_chain(shop_id: int, parent_id: str):
     """
     Verifies if shop_id matches between comment and parent comment to avoid mismatch
@@ -108,7 +109,7 @@ def write_comment(shop_id: int) -> (Response, int):
     """ /v1/shop/<shop_id>/comment endpoint
 
     Checks if user can write comment in shop's thread then saves new comment in database
-    main_id is optional and missing value returns null
+    parent_id is optional and missing value returns null
     :returns: json serialized response, http status code
     """
     session_token = request.args.get("session_token")
