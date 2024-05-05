@@ -1,6 +1,6 @@
 from flask import request, Blueprint, jsonify, Response
 from src import app_config
-from src.query_methods import hash_password, requires
+from src.query_methods import hash_password, requires, get_user_id
 import mysql.connector
 import base64
 import os
@@ -91,7 +91,8 @@ def login() -> (Response, int):
     # User exists and password is correct, return newly generated session token
     elif hash_password(password) == get_password(username):
         session_token = create_session_token(username)
-        return jsonify({"status": "success", "session_token": session_token}), 200
+        user_id = get_user_id(session_token)
+        return jsonify({"status": "success", "session_token": session_token, "user_id": user_id}), 200
     # Incorrect password
     else:
         return jsonify({"status": "fail", "message": "wrong_password"}), 401
