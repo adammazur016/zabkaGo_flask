@@ -164,7 +164,7 @@ paths:
                   description: "Moniuszki 59, 49-340 Lewin Brzeski"
   /shop/{shop_id}:
     get:
-      summary: Returns single shop data.
+      summary: Returns data of single shop.
       tags:
         - Shop
       parameters:
@@ -248,7 +248,7 @@ paths:
                   points: 5
   /user/{user_id}:
     get:
-      summary: Returns single shop data.
+      summary: Returns data of single user.
       tags:
         - User
       parameters:
