@@ -1,6 +1,6 @@
 from flask import request, Blueprint, jsonify, Response
 import mysql.connector
-from src.query_methods import auth, requires, get_user_id
+from src.query_methods import auth, requires, get_user_id, does_shop_exist
 from src import app_config
 
 comment_endpoint = Blueprint('comments', __name__)
@@ -80,7 +80,7 @@ def get_comments(shop_id: int) -> list[dict]:
     comments = []
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
-            query = f"SELECT id, user_id, parent_id, parent_id, text_content, creation_time FROM comments WHERE place_id = %s"
+            query = f"SELECT id, user_id, parent_id, place_id, text_content, creation_time FROM comments WHERE place_id = %s"
             cursor.execute(query, [shop_id])
             data = cursor.fetchall()
 
@@ -136,6 +136,9 @@ def write_comment(shop_id: int) -> (Response, int):
     session_token = request.args.get("session_token")
     content = request.args.get("content")
     parent_id = request.args.get("parent_id")
+    # Check if shop exists
+    if not does_shop_exist(shop_id):
+        return jsonify({"status": "fail", "message": "shop_not_found"}), 404
     # Check if user visited shop
     if not verify_visit(session_token, shop_id):
         return jsonify({"status": "fail", "message": "shop_not_visited"}), 403
@@ -159,8 +162,13 @@ def read_comment(shop_id: int, comment_id: int) -> (Response, int):
     :param comment_id: The ID of the comment.
     :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
+    if not does_shop_exist(shop_id):
+        return jsonify({"status": "fail", "message": "shop_not_found"}), 404
     comment = get_comment(shop_id, comment_id)
-    return jsonify(comment), 200
+    if comment:
+        return jsonify(comment), 200
+    else:
+        return jsonify({"status": "fail", "message": "comment_not_found"}), 404
 
 
 @comment_endpoint.route('/shop/<shop_id>/comments', methods=['GET'])
@@ -174,5 +182,7 @@ def read_comments(shop_id: int) -> (Response, int):
     :param shop_id: The ID of the shop.
     :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
+    if not does_shop_exist(shop_id):
+        return jsonify({"status": "fail", "message": "shop_not_found"}), 404
     comments = get_comments(shop_id)
     return jsonify(comments), 200

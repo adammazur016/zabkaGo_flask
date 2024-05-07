@@ -62,7 +62,7 @@ def return_users() -> (Response, int):
     """
     count = DEFAULT_USER_COUNT
     if request.args.get('count'):
-        count = request.args.get('count')
+        count = int(request.args.get('count'))
     return jsonify(get_users(count)), 200
 
 

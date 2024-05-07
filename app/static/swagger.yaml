@@ -37,6 +37,7 @@ paths:
           required: true
           schema:
             type: string
+            format: password
       responses:
         '200':
           description: Login successful
@@ -84,6 +85,7 @@ paths:
           required: true
           schema:
             type: string
+            format: password
       responses:
         '200':
           description: Registration successful
@@ -131,7 +133,7 @@ paths:
         - Shop
       responses:
         '200':
-          description: Shop data was returned with no issues.
+          description: Shops data was returned with no issues.
           content:
             application/json:
               schema:
@@ -166,7 +168,7 @@ paths:
       tags:
         - Shop
       parameters:
-        - in: query
+        - in: path
           name: shop_id
           required: true
           schema:
@@ -211,30 +213,89 @@ paths:
                 status: "fail"
   /users:
     get:
-      summary: Returns list of all users.
+      summary: Returns data of multiple users sorted by ranked points descending.
+      description: Number of users is specified by count argument (default=50).
       tags:
         - User
-      description:
+      parameters:
+        - in: query
+          name: count
+          required: false
+          schema:
+            type: integer
       responses:
+        '200':
+          description: Users data was returned with no issues.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    displayed_name:
+                      type: string
+                    ranking_points:
+                      type: number
+              example:
+                - id: 2
+                  name: "Krzysztof"
+                  points: 10
+                - id: 1
+                  name: "Adam"
+                  points: 5
   /user/{user_id}:
     get:
       summary: Returns single shop data.
       tags:
         - User
       parameters:
-        - in: query
+        - in: path
           name: user_id
           required: true
           schema:
             type: integer
       responses:
-  /shops/{shop_id}/visit:
+        '200':
+          description: User data was returned with no issues.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  displayed_name:
+                    type: string
+                  ranking_points:
+                    type: number
+              example:
+                id: 2
+                name: "Krzysztof"
+                points: 10
+        '404':
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+              example:
+                message: "user_not_found"
+                status: "fail"
+  /shop/{shop_id}/visit:
     post:
       summary: Sends information about shop visit.
       tags:
         - Visit
       parameters:
-        - in: query
+        - in: path
           name: shop_id
           required: true
           schema:
@@ -242,74 +303,351 @@ paths:
       security:
         - ApiKeyAuth: []
       responses:
+        '200':
+          description: User can visit shop again
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+              example:
+                message: "visit_done"
+                status: "success"
+        '403':
+          description: User is not allowed to visit shop again.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+              example:
+                message: "visit_impossible"
+                status: "fail"
+        '404':
+          description: Shop not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+              example:
+                message: "shop_not_found"
+                status: "fail"
     get:
       summary: Gets information whenever visiting shop is valid or invalid.
       tags:
         - Visit
       parameters:
+        - in: path
+          name: shop_id
+          required: true
+          schema:
+            type: integer
       security:
         - ApiKeyAuth: []
       responses:
+        '200':
+          description: User can visit shop again
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+              example:
+                message: "visit_possible"
+                status: "success"
+        '403':
+          description: User is not allowed to visit shop again.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+              example:
+                message: "visit_impossible"
+                status: "fail"
+        '404':
+          description: Shop not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+              example:
+                message: "shop_not_found"
+                status: "fail"
   /user/{user_id}/visits:
     get:
       summary: Returns list of all shops visited by user.
       tags:
         - Visit
       parameters:
-        - in: query
+        - in: path
           name: user_id
           required: true
           schema:
             type: integer
       responses:
-  /shops/{shop_id}/comment:
+        '200':
+          description: Users data was returned with no issues.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    place_id:
+                      type: integer
+                    date:
+                      type: string
+                      format: date
+              example:
+                - id: 1
+                  date: "2024-05-05"
+                - id: 2
+                  date: "2024-05-04"
+        '404':
+          description: User was not found or he didn't visit any shops.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+              example:
+                message: "visits_not_found"
+                status: "fail"
+  /shop/{shop_id}/comment:
     post:
       summary: Makes comment in shop discussion.
       tags:
         - Comment
+      security:
+        - ApiKeyAuth: []
       parameters:
-        - in: query
+        - in: path
           name: shop_id
           required: true
           schema:
             type: integer
+        - in: query
+          name: content
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: parent_id
+          required: false
+          schema:
+            type: integer
       responses:
-  /shops/{shop_id}/comments:
+        '200':
+          description: User can visit shop again
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+              example:
+                status: "success"
+        '400':
+          description: Occurs when parent comment belongs to different shop discussion than shop with specified id.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+              example:
+                message: "shop_id_and_parent_id_mismatch"
+                status: "fail"
+        '403':
+          description: User is not allowed to comment because he didn't visit the shop.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+              example:
+                message: "shop_not_visited"
+                status: "fail"
+        '404':
+          description: Shop not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+              example:
+                message: "shop_not_found"
+                status: "fail"
+  /shop/{shop_id}/comments:
     get:
       summary: Returns all comments in shop discussion.
       tags:
         - Comment
       parameters:
-        - in: query
+        - in: path
           name: shop_id
           required: true
           schema:
             type: integer
       responses:
-  /shops/{shop_id}/comment/{comment_id}:
+        '200':
+          description: Users data was returned with no issues.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    user_id:
+                      type: integer
+                    parent_id:
+                      type: integer
+                    place_id:
+                      type: integer
+                    content:
+                      type: string
+                    creation_time:
+                      type: string
+                      format: date
+              example:
+                - content: "Testowy komentarz"
+                  creation_time: "Tue, 07 May 2024 13:16:00 GMT"
+                  id: 1
+                  parent_id: 1
+                  place_id: 4
+                  user_id: 2
+                - content: "Testowy podkomentarz"
+                  creation_time: "Tue, 07 May 2024 13:21:53 GMT"
+                  id: 2
+                  parent_id: 1
+                  place_id: 4
+                  user_id: 2
+        '404':
+          description: Shop not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+              example:
+                message: "shop_not_found"
+                status: "fail"
+  /shop/{shop_id}/comment/{comment_id}:
     get:
       summary: Return data of single comment in shop discussion.
       tags:
         - Comment
       parameters:
-        - in: query
+        - in: path
           name: shop_id
           required: true
           schema:
             type: integer
-        - in: query
+        - in: path
           name: comment_id
           required: true
           schema:
             type: integer
       responses:
+        '200':
+          description: Users data was returned with no issues.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  user_id:
+                    type: integer
+                  parent_id:
+                    type: integer
+                  place_id:
+                    type: integer
+                  content:
+                    type: string
+                  creation_time:
+                    type: string
+                    format: date
+              example:
+                content: "Testowy komentarz"
+                creation_time: "Tue, 07 May 2024 13:16:00 GMT"
+                id: 1
+                parent_id: 1
+                place_id: 4
+                user_id: 2
+        '404':
+          description: Shop or comment not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+              example:
+                message: "comment_not_found"
+                status: "fail"
   /achievement/{achievement_id}:
     get:
       summary: Returns data of single achievement.
       tags:
         - Achievement
       parameters:
-        - in: query
+        - in: path
           name: achievement_id
           required: true
           schema:

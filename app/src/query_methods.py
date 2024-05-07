@@ -6,6 +6,8 @@ import mysql.connector
 import hashlib
 
 
+# TODO: Split into multiple files
+
 def get_user_id(session_token: str):
     """
     Retrieves the user ID associated with the given session token from the database.
@@ -21,6 +23,17 @@ def get_user_id(session_token: str):
                 return ''
             else:
                 return result[0][0]
+
+
+def does_shop_exist(shop_id: int) -> bool:
+    with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
+        with cnx.cursor() as cursor:
+            # Executing SQL Statements
+            # Replace login with display name later
+            query = f"SELECT EXISTS(SELECT * FROM places where id = {shop_id})"
+            cursor.execute(query)
+            exists = cursor.fetchone()[0]
+    return exists
 
 
 def hash_password(password: str) -> str:
