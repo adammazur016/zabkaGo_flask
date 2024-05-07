@@ -8,8 +8,13 @@ register_endpoint = Blueprint('register', __name__)
 
 def check_username_validity(username: str) -> (bool, str, int):
     """
-    Checks if provided username passes all requirements and is not taken
-    :returns: Returns username validity, response message and http status code
+    Validates if the provided username meets all requirements and is available.
+
+    :param username: The username to be validated.
+    :return: A tuple containing:
+             - A boolean indicating username validity.
+             - A response message.
+             - An HTTP status code.
     """
     # Minimum Length
     if len(username) < 4:

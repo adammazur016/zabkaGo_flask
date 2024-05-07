@@ -1,7 +1,7 @@
 from flask import request, Blueprint, jsonify, Response
 import mysql.connector
 from datetime import date
-from src.query_methods import auth, requires, get_user_id
+from src.query_methods import auth, requires, get_user_id, triggers
 from src import app_config
 from src.endpoints.users import add_rank_point
 from src import achievements
@@ -11,9 +11,12 @@ visit_endpoint = Blueprint('visit', __name__)
 
 def mark_visit_query(session_token, shop_id) -> dict:
     """
-    Updates date of last visit in shop with provided id
-    Identifies user based on session token
-    :returns: response ready for json serialization
+    Updates the date of the last visit in the shop with the provided ID.
+    Identifies the user based on the session token.
+
+    :param session_token: The session token of the user.
+    :param shop_id: The ID of the shop.
+    :return: The response ready for JSON serialization.
     """
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
@@ -27,11 +30,23 @@ def mark_visit_query(session_token, shop_id) -> dict:
 
 def check_visit_query(session_token, shop_id) -> dict:
     """
-    Checks if user is allowed to visit the shop with provided id
-    Identifies user based on session token
-    :returns: response ready for json serialization
-    TODO: Check if shop_id exists
+    Checks if the user is allowed to visit the shop with the provided ID.
+    Identifies the user based on the session token.
+
+    :param session_token: The session token of the user.
+    :param shop_id: The ID of the shop to be visited.
+    :return: The response ready for JSON serialization.
     """
+
+    # Check if shop exists
+    with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
+        with cnx.cursor() as cursor:
+            query = f"SELECT EXISTS(SELECT * FROM places WHERE id = '{shop_id}')"
+            cursor.execute(query)
+            shop_exists = cursor.fetchone()[0]
+    if not shop_exists:
+        return {"status": "fail", "message": "shop_not_found"}
+
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
             user_id = get_user_id(session_token)
@@ -50,8 +65,10 @@ def check_visit_query(session_token, shop_id) -> dict:
 
 def get_user_visits(user_id) -> list[dict]:
     """
-    Receives list of all visits made by user with provided id from database.
-    :returns: List of all visits made by user
+    Retrieves a list of all visits made by the user with the provided ID from the database.
+
+    :param user_id: The ID of the user.
+    :return: A list of all visits made by the user.
     """
     visits = []
 
@@ -69,26 +86,27 @@ def get_user_visits(user_id) -> list[dict]:
 @visit_endpoint.route('/shop/<shop_id>/visit', methods=['POST'])
 @auth
 @requires("session_token")
+@triggers(achievements.VisitCountAchievements, achievements.PointCountAchievements)
 def make_visit(shop_id) -> (Response, int):
     """
-    Checks if user is allowed to visit the shop with provided id
-    If it is allowed, marks his visit in database
-    Requires authentication and identifies user based on session token
-    :returns: json serialized response, http status code
+    Checks if the user is allowed to visit the shop with the provided ID.
+    If allowed, marks their visit in the database.
+    Authentication is required, and the user is identified based on the session token.
+
+    :param shop_id: The ID of the shop to be visited.
+    :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
     session_token = request.args.get("session_token")
     # Check if visit is allowed
     check_query_result = check_visit_query(session_token, shop_id)
     if check_query_result["status"] == "fail":
         return jsonify(check_query_result), 403
+    elif check_query_result["message"] == "shop_not_found":
+        return jsonify(check_query_result), 404
     # Mark visit
     mark_query_result = mark_visit_query(session_token, shop_id)
     # Add ranked points
     add_rank_point(session_token)
-    # Check if visit resulted in new achievement
-    possible_achievements = achievements.VisitCountAchievements + achievements.PointCountAchievements
-    achievements.check_triggers(user_id=get_user_id(session_token),
-                                achievements=possible_achievements)
     # Send reply
     return jsonify(mark_query_result), 200
 
@@ -97,11 +115,14 @@ def make_visit(shop_id) -> (Response, int):
 @auth
 @requires("session_token")
 def check_visit(shop_id) -> (Response, int):
-    """ /v1/shop/<shop_id>/visit endpoint
+    """
+    /v1/shop/<shop_id>/visit endpoint
 
-    Checks if user is allowed to visit the shop with provided id
-    Requires authentication and identifies user based on session token
-    :returns: json serialized response, http status code
+    Verifies if the user is allowed to visit the shop with the provided ID.
+    Authentication is required, and the user is identified based on the session token.
+
+    :param shop_id: The ID of the shop to be visited.
+    :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
     session_token = request.args.get("session_token")
     query_result = check_visit_query(session_token, shop_id)
@@ -109,17 +130,23 @@ def check_visit(shop_id) -> (Response, int):
     # Status code 200 if visit is allowed, 403 if forbidden
     if query_result["status"] == "success":
         return jsonify(query_result), 200
+    elif query_result["message"] == "shop_not_found":
+        return jsonify(query_result), 404
     else:
         return jsonify(query_result), 403
 
 
 @visit_endpoint.route('/user/<user_id>/visits', methods=['GET'])
 def check_user_visits(user_id) -> (Response, int):
-    """ /v1/user/<user_id>/visits endpoint
-
-    Returns list of all shops visited by user, including visit date
-    :returns: json serialized response, http status code
     """
+    /v1/user/<user_id>/visits endpoint
+
+    Retrieves a list of all shops visited by the user, including visit dates.
+
+    :param user_id: The ID of the user.
+    :return: JSON-serialized response, along with the corresponding HTTP status code.
+    """
+
     user_data = get_user_visits(user_id)
 
     # Empty user_data -> user was not found or haven't made any visits

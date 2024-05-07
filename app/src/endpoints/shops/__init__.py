@@ -8,10 +8,10 @@ shops_endpoint = Blueprint('shops', __name__)
 
 def get_shops() -> list[dict]:
     """
-    Looks up all shops in database.
-    :returns: List of shops data represented as dictionary.
-    """
+    Retrieves data of all shops from the database.
 
+    :return: A list of shop data represented as dictionaries.
+    """
     places = []
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
@@ -31,8 +31,10 @@ def get_shops() -> list[dict]:
 
 def get_shop(shop_id: int) -> dict:
     """
-    Looks up shop with provided id in database
-    :returns: shop data represented as dictionary or empty dict if shop does not exist
+    Retrieves data of the shop with the provided ID from the database.
+
+    :param shop_id: The ID of the shop to retrieve.
+    :return: Shop data represented as a dictionary, or an empty dictionary if the shop does not exist.
     """
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
@@ -54,11 +56,13 @@ def get_shop(shop_id: int) -> dict:
 
 @shops_endpoint.route('/shops', methods=['GET'])
 def return_shops() -> (Response, int):
-    """ /v1/shops endpoint
+    """
+    /v1/shops endpoint
 
-    Returns data of all shops
-    TODO: Probably needs optimization in case shop database becomes too big
-    :returns: json serialized response, http status code
+    Retrieves data of all shops.
+    TODO: Probably needs optimization in case the shop database becomes too big.
+
+    :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
     places = get_shops()
     return jsonify(places), 200
@@ -66,10 +70,13 @@ def return_shops() -> (Response, int):
 
 @shops_endpoint.route('/shop/<shop_id>', methods=['GET'])
 def return_shop(shop_id) -> (Response, int):
-    """ /v1/shop/<shop_id> endpoint
+    """
+    /v1/shop/<shop_id> endpoint
 
-    Returns data of shop with provided id
-    :returns: json serialized response, http status code
+    Retrieves data of the shop with the provided ID.
+
+    :param shop_id: The ID of the shop.
+    :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
     shop = get_shop(shop_id)
     return jsonify(shop), 200

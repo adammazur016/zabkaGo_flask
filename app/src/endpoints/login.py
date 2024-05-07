@@ -10,9 +10,10 @@ login_endpoint = Blueprint('login', __name__)
 
 def generate_session_token(length: int = 128) -> str:
     """
-    Generates session token using url-safe base64
-    :param length: (Default value = 128) number of characters in session token
-    :returns: Returns new session token
+    Generates a session token using URL-safe base64 encoding.
+
+    :param length: (Default value = 128) The number of characters in the session token.
+    :return: The newly generated session token.
     """
     random_bytes = os.urandom(length)
     base64_encoded = base64.urlsafe_b64encode(random_bytes).decode('utf-8')
@@ -22,8 +23,9 @@ def generate_session_token(length: int = 128) -> str:
 
 def user_exists(username: str) -> bool:
     """
-    Checks if username exists in database
-    :param username: str: Checked user
+    Checks if the username exists in the database.
+
+    :return: True if the username exists, False otherwise.
     """
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
@@ -38,8 +40,9 @@ def user_exists(username: str) -> bool:
 
 def create_session_token(username: str) -> str:
     """
-    Creates new session token upon login
-    :returns: Returns newly generated session token
+    Generates a new session token upon login.
+
+    :return: The newly generated session token.
     """
     new_token = generate_session_token()
 
@@ -57,8 +60,9 @@ def create_session_token(username: str) -> str:
 
 def get_password(username: str) -> str:
     """
-    :param username: User whose password will be returned
-    :returns: Returns user's hashed password
+    Retrieves the hashed password associated with the given username from the database.
+
+    :return: The hashed password of the user.
     """
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
@@ -76,11 +80,13 @@ def get_password(username: str) -> str:
 @login_endpoint.route('/login', methods=['POST'])
 @requires('username', 'password')
 def login() -> (Response, int):
-    """ /v1/login endpoint
+    """
+    /v1/login endpoint.
 
-    Checks if given username and password match with database
-    Successful verification generates new session token and returns it to user
-    :returns: json serialized response, http status code
+    Verifies if the provided username and password match records in the database.
+    Upon successful verification, generates a new session token and returns it to the user.
+
+    :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
     username = request.args.get("username")
     password = request.args.get("password")

@@ -9,9 +9,11 @@ users_endpoint = Blueprint('users', __name__)
 
 def get_users(count: int) -> list[dict]:
     """
-    Looks up top 'count' users in database, sorted by ranking points.
-    If 'count' parameter exceeds the limit, it is reduced to allowed maximum.
-    :returns: List of users data represented as dictionary.
+    Retrieves the top 'count' users from the database, sorted by ranking points.
+    If the 'count' parameter exceeds the limit, it is reduced to the maximum allowed.
+
+    :param count: The number of users to retrieve.
+    :return: A list of user data represented as dictionaries.
     """
     users_data = []
     # Limit number of users in single lookup
@@ -29,8 +31,10 @@ def get_users(count: int) -> list[dict]:
 
 def get_user(user_id: int) -> dict:
     """
-    Looks up user with provided id.
-    :returns: user data as dictionary or empty dict if user does not exist.
+    Retrieves the user with the provided ID.
+
+    :param user_id: The ID of the user to retrieve.
+    :return: User data as a dictionary, or an empty dictionary if the user does not exist.
     """
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
@@ -47,12 +51,14 @@ def get_user(user_id: int) -> dict:
 
 @users_endpoint.route('/users', methods=['GET'])
 def return_users() -> (Response, int):
-    """ /v1/users endpoint
+    """
+    /v1/users endpoint
 
-    Returns data of 'count' number of users
-    Maximum of 'MAX_USERS_PER_REQUEST' at once
-    If 'count' is not found, it is replaced by 'DEFAULT_USER_COUNT'
-    :returns: json serialized response, http status code
+    Retrieves data of 'count' number of users.
+    Maximum of 'MAX_USERS_PER_REQUEST' at once.
+    If 'count' is not specified, it defaults to 'DEFAULT_USER_COUNT'.
+
+    :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
     count = DEFAULT_USER_COUNT
     if request.args.get('count'):
@@ -62,10 +68,12 @@ def return_users() -> (Response, int):
 
 @users_endpoint.route('/user/<user_id>', methods=['GET'])
 def return_user(user_id) -> (Response, int):
-    """ /v1/user/<user_id> endpoint
+    """
+    /v1/user/<user_id> endpoint
 
-    Returns data of user with provided user id.
-    :returns: json serialized response, http status code
+    Retrieves data of the user with the provided user ID.
+
+    :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
     user_data = get_user(user_id)
 
@@ -78,7 +86,10 @@ def return_user(user_id) -> (Response, int):
 
 def add_rank_point(session_token, amount=1):
     """
-    Adds ranking point to user who owns provided session token
+    Adds a ranking point to the user who owns the provided session token.
+
+    :param session_token: The session token of the user.
+    :param amount: (Default value = 1) The number of ranking points to add.
     """
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:

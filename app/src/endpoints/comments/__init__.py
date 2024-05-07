@@ -8,7 +8,10 @@ comment_endpoint = Blueprint('comments', __name__)
 
 def verify_visit(session_token: str, shop_id: int):
     """
-    Verifies if user visited provided shop
+    Verifies if the user visited the provided shop.
+
+    :param session_token: The session token of the user.
+    :param shop_id: The ID of the shop.
     """
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
@@ -24,7 +27,10 @@ def verify_visit(session_token: str, shop_id: int):
 
 def verify_comment_chain(shop_id: int, parent_id: str):
     """
-    Verifies if shop_id matches between comment and parent comment to avoid mismatch
+    Verifies if the shop_id matches between the comment and the parent comment to avoid mismatch.
+
+    :param shop_id: The ID of the shop.
+    :param parent_id: The ID of the parent comment.
     """
     if not parent_id:
         return True
@@ -42,8 +48,14 @@ def verify_comment_chain(shop_id: int, parent_id: str):
 
 def insert_comment(session_token: str, shop_id: int, parent_id: str | None, content: str):
     """
-    Inserts comment into database. If it is original comment pass parent_id as None, otherwise use parent comment id
+    Inserts a comment into the database. If it is an original comment, pass None as the parent_id; otherwise, use the parent comment ID.
+
+    :param session_token: The session token of the user.
+    :param shop_id: The ID of the shop.
+    :param parent_id: The ID of the parent comment, or None if it's an original comment.
+    :param content: The content of the comment.
     """
+
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
             user_id = get_user_id(session_token)
@@ -60,8 +72,10 @@ def insert_comment(session_token: str, shop_id: int, parent_id: str | None, cont
 
 def get_comments(shop_id: int) -> list[dict]:
     """
-    Return data of all comments in shop discussion
-    :returns: List of comments data represented as dictionary.
+    Retrieves data of all comments in the shop discussion.
+
+    :param shop_id: The ID of the shop.
+    :return: A list of comments data represented as dictionaries.
     """
     comments = []
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
@@ -82,8 +96,11 @@ def get_comments(shop_id: int) -> list[dict]:
 
 def get_comment(shop_id: int, comment_id: int) -> dict:
     """
-    Return content of all comments in shop discussion
-    :returns: Comment data represented as dictionary
+    Retrieves the content of the comment with the provided ID from the shop discussion.
+
+    :param shop_id: The ID of the shop.
+    :param comment_id: The ID of the comment.
+    :return: Comment data represented as a dictionary.
     """
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
@@ -106,11 +123,14 @@ def get_comment(shop_id: int, comment_id: int) -> dict:
 @auth
 @requires('session_token', 'content')
 def write_comment(shop_id: int) -> (Response, int):
-    """ /v1/shop/<shop_id>/comment endpoint
+    """
+    /v1/shop/<shop_id>/comment endpoint
 
-    Checks if user can write comment in shop's thread then saves new comment in database
-    parent_id is optional and missing value returns null
-    :returns: json serialized response, http status code
+    Checks if the user can write a comment in the shop's thread, then saves the new comment in the database.
+    The parent_id is optional, and a missing value returns null.
+
+    :param shop_id: The ID of the shop.
+    :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
     session_token = request.args.get("session_token")
     content = request.args.get("content")
@@ -129,10 +149,14 @@ def write_comment(shop_id: int) -> (Response, int):
 
 @comment_endpoint.route('/shop/<shop_id>/comment/<comment_id>', methods=['GET'])
 def read_comment(shop_id: int, comment_id: int) -> (Response, int):
-    """ /v1/shop/<shop_id>/comment/<comment_id> endpoint
+    """
+    /v1/shop/<shop_id>/comment/<comment_id> endpoint
 
-    Return content of comment with provided id
-    :returns: json serialized response, http status code
+    Retrieves the content of the comment with the provided ID.
+
+    :param shop_id: The ID of the shop.
+    :param comment_id: The ID of the comment.
+    :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
     comment = get_comment(shop_id, comment_id)
     return jsonify(comment), 200
@@ -140,11 +164,14 @@ def read_comment(shop_id: int, comment_id: int) -> (Response, int):
 
 @comment_endpoint.route('/shop/<shop_id>/comments', methods=['GET'])
 def read_comments(shop_id: int) -> (Response, int):
-    """ /v1/shop/<shop_id>/comments endpoint
+    """
+    /v1/shop/<shop_id>/comments endpoint
 
-    Returns all comments in shop's thread
-    :returns: json serialized response, http status code
-    TODO: Implement limit to number of comments per request and filters (date, most upvoted etc)
+    Retrieves all comments in the shop's thread.
+    TODO: Implement a limit to the number of comments per request and filters (date, most upvoted, etc).
+
+    :param shop_id: The ID of the shop.
+    :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
     comments = get_comments(shop_id)
     return jsonify(comments), 200

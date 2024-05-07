@@ -68,16 +68,23 @@ PointCountAchievements: list[Achievement] = [GetTenPoints, GetHundredPoints]
 
 def dummy_check() -> bool:
     """
-    Executes when one of Achievement subclass doesn't implement check_requirements()
+    Placeholder function executed when the check_requirements() method is not implemented in one of the Achievement subclasses.
+
+    :return: Always returns False.
     """
-    print(f"\"Check function\" for one of achievements is not implemented")
+    print(f"The 'check_requirements()' function for one of the achievements is not implemented.")
     return False
 
 
 def check_visit_count(needed_count: int, user_id: int) -> bool:
     """
-    Checks if the user has visited specific amount of shops
+    Checks if the user has visited a specific number of shops.
+
+    :param needed_count: The required number of shop visits.
+    :param user_id: The ID of the user.
+    :return: True if the user has visited the required number of shops, False otherwise.
     """
+
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
             query = f"SELECT COUNT(place_id) FROM visits WHERE user_id = '{user_id}'"
@@ -91,7 +98,11 @@ def check_visit_count(needed_count: int, user_id: int) -> bool:
 
 def check_point_count(needed_points: int, user_id: int) -> bool:
     """
-    Checks if the user has enough points
+    Verifies if the user has a sufficient number of points.
+
+    :param needed_points: The required number of points.
+    :param user_id: The ID of the user whose points are being checked.
+    :return: True if the user has enough points, False otherwise.
     """
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
@@ -112,8 +123,11 @@ def check_triggers(user_id: int, achievements: list[Achievement]):
 
 def check_achievement_acquisition(user_id: int, achievement_id: int):
     """
-    Checks if user got an achievement
-    :return: True if achievement was already acquired, False otherwise
+    Verifies if a user has acquired a specific achievement.
+
+    :param user_id: The ID of the user.
+    :param achievement_id: The ID of the achievement.
+    :return: True if the achievement has been acquired by the user, False otherwise.
     """
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
@@ -130,7 +144,11 @@ def check_achievement_acquisition(user_id: int, achievement_id: int):
 
 def add_achievement(user_id: int, achievement_id: int) -> None:
     """
-    Add achievement as acquired by user
+    Marks an achievement as acquired by a user.
+
+    :param user_id: The ID of the user.
+    :param achievement_id: The ID of the achievement.
+    :return: None
     """
     if check_achievement_acquisition(user_id, achievement_id):
         return

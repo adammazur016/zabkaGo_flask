@@ -5,12 +5,12 @@ from src import app_config
 achievements_endpoint = Blueprint('achievements', __name__)
 
 
-def get_achievements():
+def get_achievements() -> list[dict]:
     """
-    Looks up all achievements in database.
-    :returns: List of achievements data represented as dictionary.
-    """
+    Retrieves data of all achievements from the database.
 
+    :return: A list of achievements data represented as dictionaries.
+    """
     achievements_data = []
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
@@ -24,10 +24,12 @@ def get_achievements():
     return achievements_data
 
 
-def get_achievement(achievement_id: int):
+def get_achievement(achievement_id: int) -> dict:
     """
-    Looks up achievement in database.
-    :returns: Achievement data represented as dictionary.
+    Retrieves data of the achievement with the provided ID from the database.
+
+    :param achievement_id: The ID of the achievement to retrieve.
+    :return: Achievement data represented as a dictionary.
     """
     achievement_data = {}
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
@@ -46,10 +48,13 @@ def get_achievement(achievement_id: int):
 
 @achievements_endpoint.route('/achievement/<achievement_id>', methods=['GET'])
 def return_achievement_data(achievement_id: int) -> (Response, int):
-    """ /v1/achievement/<achievement_id> endpoint
+    """
+    /v1/achievement/<achievement_id> endpoint
 
-    Returns data of achievement with provided id
-    :returns: json serialized response, http status code
+    Retrieves data of the achievement with the provided ID.
+
+    :param achievement_id: The ID of the achievement.
+    :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
     achievement_data = get_achievement(achievement_id)
     if achievement_data:
@@ -60,10 +65,12 @@ def return_achievement_data(achievement_id: int) -> (Response, int):
 
 @achievements_endpoint.route('/achievements', methods=['GET'])
 def return_achievements_data() -> (Response, int):
-    """ /v1/achievements endpoint
+    """
+    /v1/achievements endpoint
 
-    Returns data of all achievements
-    TODO: Probably needs optimization in case shop database becomes too big
-    :returns: json serialized response, http status code
+    Retrieves data of all achievements.
+    TODO: Probably needs optimization in case the achievements database becomes too big.
+
+    :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
     return jsonify(get_achievements())

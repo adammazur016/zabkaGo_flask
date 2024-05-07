@@ -9,7 +9,7 @@ load_dotenv()
 class Config:
     """
     Contains all configuration variables.
-    Loads default config then replaces it with all variables found in .env.
+    Loads the default config and then replaces it with all variables found in .env.
     """
     def __init__(self):
         self.config = DefaultConfig()

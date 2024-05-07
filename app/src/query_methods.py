@@ -1,11 +1,18 @@
 from functools import wraps
 from flask import request, jsonify, Response
 from src import app_config
+from src.achievements import check_triggers, Achievement
 import mysql.connector
 import hashlib
 
 
 def get_user_id(session_token: str):
+    """
+    Retrieves the user ID associated with the given session token from the database.
+
+    :param session_token: The session token used to identify the user.
+    :return: The user ID if the session token is valid, otherwise an empty string.
+    """
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
             cursor.execute(f"SELECT id FROM users WHERE session_token = '{session_token}'")
@@ -18,8 +25,10 @@ def get_user_id(session_token: str):
 
 def hash_password(password: str) -> str:
     """
-    Hashes password using sha256 algorithm
-    :returns: hashed password
+    Hashes a password using the SHA256 algorithm.
+
+    :param password: The password to be hashed.
+    :return: The hashed password.
     """
     # Convert password to bytes encoded in utf-8
     password_bytes = password.encode('utf-8')
@@ -32,44 +41,32 @@ def hash_password(password: str) -> str:
 
 def access_denied() -> (Response, int):
     """
-    Default response when trying to access authentication protected endpoint with no valid session token
-    :returns: prepared response, http status code
+    Default response when attempting to access an authentication-protected endpoint without a valid session token.
+
+    :return: A prepared response along with the HTTP status code.
     """
     return {'status': 'fail', 'message': 'no_session_token'}, 401
 
 
-def admin_verify(admin_api_key: str) -> bool:
-    """
-    At this moment it's unused method of authorization in endpoints reserved for admins.
-    :returns: verification result
-    TODO: Implement verification via db // Currently unnecessary
-    """
-    if admin_api_key == 'test':
-        return True
-    else:
-        return False
-
-
 def verify(session_token: str) -> bool:
     """
-    (Part of @auth decorator) Checks if given session token is valid
-    :returns: verification result
+    (Part of the @auth decorator) Checks if the given session token is valid.
+
+    :param session_token: The session token to be verified.
+    :return: The verification result.
     """
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
             query = f"SELECT EXISTS(SELECT * FROM users WHERE session_token = '{session_token}')"
             cursor.execute(query)
             exists = cursor.fetchone()[0]
-    if exists:
-        return True
-    else:
-        return False
+    return exists
 
 
 def requires(*args, **kwargs):
     """
-    Decorator which checks if specified parameters were passed in request.
-    If they are missing, it automatically returns error 400 with missing parameters and prevents execution of wrapped function.
+    Decorator that checks if specified parameters were passed in the request.
+    If any of them are missing, it automatically returns a 400 error with a message indicating the missing parameters and prevents the execution of the wrapped function.
     """
     def decorator(func):
         @wraps(func)
@@ -83,24 +80,32 @@ def requires(*args, **kwargs):
     return decorator
 
 
-def admin_auth(func):
+def triggers(*args: list[Achievement]):
     """
-    Decorator used in endpoints requiring admin authorization.
-    Currently unused.
+    Decorator that, after the execution of the wrapped function, checks if the user may acquire new achievements.
+    Requirement checks are only performed for achievements specified in the decorator arguments.
     """
-    @wraps(func)
-    def verify_key(*args, **kwargs):
-        if request.args.get('session_token') and admin_verify(request.args.get('session_token')):
-            return func(*args, **kwargs)
-        else:
-            return access_denied()
-    return verify_key
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*wrapped_args, **wrapped_kwargs):
+            ret_val = func(*wrapped_args, **wrapped_kwargs)
+            if request.args['session_token']:
+                user_id = get_user_id(request.args['session_token'])
+                achievements = [achievement for achievement_list in args for achievement in achievement_list]
+                check_triggers(user_id, achievements)
+            elif request.args['user_id']:
+                user_id = int(request.args['user_id'])
+                achievements = [achievement for achievement_list in args for achievement in achievement_list]
+                check_triggers(user_id, achievements)
+            return ret_val
+        return wrapper
+    return decorator
 
 
 def auth(func):
     """
-    Decorator used in endpoints requiring normal authorization.
-    Checks existence of session_token parameter in request, then verifies if it's valid.
+    Decorator used in endpoints requiring standard authorization.
+    Checks for the existence of the session_token parameter in the request, then verifies if it's valid.
     """
     @wraps(func)
     def verify_key(*args, **kwargs):
