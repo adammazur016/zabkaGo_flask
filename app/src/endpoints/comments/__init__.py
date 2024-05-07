@@ -80,16 +80,17 @@ def get_comments(shop_id: int) -> list[dict]:
     comments = []
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
-            query = f"SELECT user_id, parent_id, parent_id, text_content, creation_time FROM comments WHERE place_id = %s"
+            query = f"SELECT id, user_id, parent_id, parent_id, text_content, creation_time FROM comments WHERE place_id = %s"
             cursor.execute(query, [shop_id])
             data = cursor.fetchall()
 
             for comment in data:
-                comments.append({"user_id": comment[0],
-                                 "parent_id": comment[1],
-                                 "place_id": comment[2],
-                                 "content": comment[3],
-                                 "creation_time": comment[4]})
+                comments.append({"id": comment[0],
+                                 "user_id": comment[1],
+                                 "parent_id": comment[2],
+                                 "place_id": comment[3],
+                                 "content": comment[4],
+                                 "creation_time": comment[5]})
 
     return comments
 

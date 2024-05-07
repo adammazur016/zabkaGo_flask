@@ -73,4 +73,4 @@ def return_achievements_data() -> (Response, int):
 
     :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
-    return jsonify(get_achievements())
+    return jsonify(get_achievements()), 200

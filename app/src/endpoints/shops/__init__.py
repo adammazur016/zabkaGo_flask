@@ -64,8 +64,8 @@ def return_shops() -> (Response, int):
 
     :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
-    places = get_shops()
-    return jsonify(places), 200
+    shops = get_shops()
+    return jsonify(shops), 200
 
 
 @shops_endpoint.route('/shop/<shop_id>', methods=['GET'])
@@ -79,7 +79,10 @@ def return_shop(shop_id) -> (Response, int):
     :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
     shop = get_shop(shop_id)
-    return jsonify(shop), 200
+    if shop:
+        return jsonify(shop), 200
+    else:
+        return jsonify({"status": "fail", "message": "shop_not_found"}), 404
 
 
 shops_endpoint.register_blueprint(visit.visit_endpoint)
