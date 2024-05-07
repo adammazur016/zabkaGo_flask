@@ -12,12 +12,20 @@ components:
       type: apiKey
       in: query
       name: session_token
+tags:
+  - name: Account
+  - name: Achievement
+  - name: Comment
+  - name: Shop
+  - name: User
+  - name: Visit
 paths:
   /login:
     post:
       summary: Authenticates user.
-      description: Takes username and password, compares given password with database then, if it matches,
-                  generates new session token and returns it to user.
+      description: Upon correct authentications returns newly generated session token and id of user.
+      tags:
+        - Account
       parameters:
         - in: query
           name: username
@@ -43,6 +51,9 @@ paths:
                   status:
                     type: string
                     example: success
+                  user_id:
+                    type: integer
+                    example: 1
         '401':
           description: Wrong password
           content:
@@ -60,6 +71,8 @@ paths:
     post:
       summary: Creates new user.
       description: Takes username and password, verifies their validity and creates new user after passing all checks.
+      tags:
+        - Account
       parameters:
         - in: query
           name: username
@@ -81,9 +94,10 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: success
+              example:
+                status: "success"
         '400':
-          description: Registration failed
+          description: Login or password doesn't meet requirements.
           content:
             application/json:
               schema:
@@ -91,24 +105,272 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: username_taken
                   status:
                     type: string
-                    example: fail
+              example:
+                message: "login_too_short"
+                status: "fail"
+        '409':
+          description: Username is taken
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+              example:
+                message: "username_taken"
+                status: "fail"
   /shops:
     get:
       summary: Returns list of all Zabka shops.
-      description:
-      parameters:
+      tags:
+        - Shop
       responses:
-  /shops/visit/{shop_id}:
+        '200':
+          description: Shop data was returned with no issues.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    long:
+                      type: number
+                    lat:
+                      type: number
+                    name:
+                      type: string
+                    description:
+                      type: string
+              example:
+                - id: 1
+                  long: 17.015884034062445
+                  lat: 51.0940211383086
+                  name: "Zabka"
+                  description: "Zaporoska 42A, 53-416 Wrocław"
+                - id: 2
+                  long: 17.613560460684557
+                  lat: 50.754277918741785
+                  name: "Zabka"
+                  description: "Moniuszki 59, 49-340 Lewin Brzeski"
+  /shop/{shop_id}:
+    get:
+      summary: Returns single shop data.
+      tags:
+        - Shop
+      parameters:
+        - in: query
+          name: shop_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Shop data was returned with no issues.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  long:
+                    type: number
+                  lat:
+                    type: number
+                  name:
+                    type: string
+                  description:
+                    type: string
+              example:
+                id: 1
+                long: 17.015884034062445
+                lat: 51.0940211383086
+                name: "Zabka"
+                description: "Zaporoska 42A, 53-416 Wrocław"
+        '404':
+          description: Shop not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+              example:
+                message: "shop_not_found"
+                status: "fail"
+  /users:
+    get:
+      summary: Returns list of all users.
+      tags:
+        - User
+      description:
+      responses:
+  /user/{user_id}:
+    get:
+      summary: Returns single shop data.
+      tags:
+        - User
+      parameters:
+        - in: query
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+  /shops/{shop_id}/visit:
     post:
       summary: Sends information about shop visit.
+      tags:
+        - Visit
       parameters:
+        - in: query
+          name: shop_id
+          required: true
+          schema:
+            type: integer
+      security:
+        - ApiKeyAuth: []
       responses:
     get:
       summary: Gets information whenever visiting shop is valid or invalid.
+      tags:
+        - Visit
       parameters:
       security:
         - ApiKeyAuth: []
       responses:
+  /user/{user_id}/visits:
+    get:
+      summary: Returns list of all shops visited by user.
+      tags:
+        - Visit
+      parameters:
+        - in: query
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+  /shops/{shop_id}/comment:
+    post:
+      summary: Makes comment in shop discussion.
+      tags:
+        - Comment
+      parameters:
+        - in: query
+          name: shop_id
+          required: true
+          schema:
+            type: integer
+      responses:
+  /shops/{shop_id}/comments:
+    get:
+      summary: Returns all comments in shop discussion.
+      tags:
+        - Comment
+      parameters:
+        - in: query
+          name: shop_id
+          required: true
+          schema:
+            type: integer
+      responses:
+  /shops/{shop_id}/comment/{comment_id}:
+    get:
+      summary: Return data of single comment in shop discussion.
+      tags:
+        - Comment
+      parameters:
+        - in: query
+          name: shop_id
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: comment_id
+          required: true
+          schema:
+            type: integer
+      responses:
+  /achievement/{achievement_id}:
+    get:
+      summary: Returns data of single achievement.
+      tags:
+        - Achievement
+      parameters:
+        - in: query
+          name: achievement_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Achievement data was returned with no issues.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  description:
+                    type: string
+              example:
+                id: 1
+                name: "Pięć sklepów"
+                description: "Odwiedź pieć sklepów"
+        '404':
+          description: Achievement not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+              example:
+                message: "achievement_not_found"
+                status: "fail"
+  /achievements:
+    get:
+      summary: Returns data of all achievements.
+      tags:
+        - Achievement
+      responses:
+        '200':
+          description: Achievements data was returned with no issues.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    description:
+                      type: string
+              example:
+                - id: 1
+                  name: "Pięć sklepów"
+                  description: "Odwiedź pieć sklepów"
+                - id: 2
+                  name: "10 punktów"
+                  description: "Zdobądź dziesięć punktów"
