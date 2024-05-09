@@ -46,6 +46,26 @@ def get_achievement(achievement_id: int) -> dict:
     return achievement_data
 
 
+def get_user_achievements(user_id) -> list[dict]:
+    """
+    Retrieves a list of all achievements obtained by the user with the provided ID from the database.
+
+    :param user_id: The ID of the user.
+    :return: A list of all achievements obtained by the user.
+    """
+    achievements = []
+
+    with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
+        with cnx.cursor() as cursor:
+            query = f"SELECT achievement_id FROM users_achievements WHERE user_id = {user_id}"
+            cursor.execute(query)
+            data = cursor.fetchall()
+            # There is no information that the user ever visited the shop, it will be his first visit
+            for achievement in data:
+                achievements.append({"achievement_id": achievement[0]})
+    return achievements
+
+
 @achievements_endpoint.route('/achievement/<achievement_id>', methods=['GET'])
 def return_achievement_data(achievement_id: int) -> (Response, int):
     """
@@ -74,3 +94,23 @@ def return_achievements_data() -> (Response, int):
     :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
     return jsonify(get_achievements()), 200
+
+
+@achievements_endpoint.route('/user/<user_id>/achievements', methods=['GET'])
+def return_user_achievements(user_id) -> (Response, int):
+    """
+    /v1/user/<user_id>/achievements endpoint
+
+    Retrieves a list of all achievements obtained by the user.
+
+    :param user_id: The ID of the user.
+    :return: JSON-serialized response, along with the corresponding HTTP status code.
+    """
+
+    user_data = get_user_achievements(user_id)
+
+    # Empty user_data -> user was not found or did not obtain any achievements
+    if user_data:
+        return jsonify(user_data), 200
+    else:
+        return jsonify({"status": "fail", "message": "achievements_not_found"}), 404

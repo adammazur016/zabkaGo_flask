@@ -413,7 +413,7 @@ paths:
             type: integer
       responses:
         '200':
-          description: Users data was returned with no issues.
+          description: User's visit data was returned with no issues.
           content:
             application/json:
               schema:
@@ -421,15 +421,15 @@ paths:
                 items:
                   type: object
                   properties:
-                    place_id:
+                    shop_id:
                       type: integer
                     date:
                       type: string
                       format: date
               example:
-                - id: 1
+                - shop_id: 1
                   date: "2024-05-05"
-                - id: 2
+                - shop_id: 2
                   date: "2024-05-04"
         '404':
           description: User was not found or he didn't visit any shops.
@@ -712,3 +712,43 @@ paths:
                 - id: 2
                   name: "10 punktów"
                   description: "Zdobądź dziesięć punktów"
+  /user/{user_id}/achievements:
+    get:
+      summary: Returns list of all achievements obtained by user.
+      tags:
+        - Achievement
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User's achievement data was returned with no issues.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    achievement_id:
+                      type: integer
+              example:
+                - achievement_id: 1
+                - achievement_id: 2
+        '404':
+          description: User was not found or he didn't obtain any achievements.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+              example:
+                message: "achievements_not_found"
+                status: "fail"
