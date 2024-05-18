@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, Response
 from src import app_config
 import mysql.connector
-from src.endpoints.shops import visit
+from src.endpoints.shops import visit, likes
 
 shops_endpoint = Blueprint('shops', __name__)
 
@@ -86,3 +86,4 @@ def return_shop(shop_id) -> (Response, int):
 
 
 shops_endpoint.register_blueprint(visit.visit_endpoint)
+shops_endpoint.register_blueprint(likes.likes_endpoint)
