@@ -1,14 +1,15 @@
 from flask import request, Blueprint, jsonify, Response
 import mysql.connector
 from datetime import date
-from src.query_methods import auth, requires, get_user_id, triggers, does_shop_exist
+from src.query_methods import auth, get_user_id, triggers, does_shop_exist
 from src import app_config
 from src.endpoints.users import add_rank_point
 from src import achievements
 
 visit_endpoint = Blueprint('visit', __name__)
 
-def mark_visit_query(user_id, shop_id):
+
+def mark_visit(user_id, shop_id):
     """
     Updates the date of the last visit in the shop with the provided ID.
     Identifies the user based on the session token.
@@ -24,14 +25,14 @@ def mark_visit_query(user_id, shop_id):
         cnx.commit()
 
 
-def check_visit_query(user_id, shop_id) -> dict:
+def check_last_visit_date(user_id, shop_id) -> str:
     """
     Checks if the user is allowed to visit the shop with the provided ID.
     Identifies the user based on the session token.
 
     :param user_id: The ID of the user.
     :param shop_id: The ID of the shop to be visited.
-    :return: The response ready for JSON serialization.
+    :return: Date of the last visit
     """
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
@@ -66,7 +67,6 @@ def get_user_visits(user_id) -> list[dict]:
 
 @visit_endpoint.route('/shop/<shop_id>/visit', methods=['POST'])
 @auth
-@requires("session_token")
 @triggers(achievements.VisitCountAchievements, achievements.PointCountAchievements)
 def make_visit(shop_id) -> (Response, int):
     """
@@ -83,9 +83,9 @@ def make_visit(shop_id) -> (Response, int):
     if not does_shop_exist(shop_id):
         return jsonify({"status": "fail", "message": "shop_not_found"}), 404
     # Check if visit is allowed
-    if check_visit_query(user_id, shop_id) != date.today():
+    if check_last_visit_date(user_id, shop_id) != date.today():
         # Mark visit
-        mark_visit_query(user_id, shop_id)
+        mark_visit(user_id, shop_id)
         # Add ranked points
         add_rank_point(user_id)
         # Send reply
@@ -94,11 +94,9 @@ def make_visit(shop_id) -> (Response, int):
         return jsonify({"status": "fail", "message": "visit_impossible"}), 403
 
 
-
 @visit_endpoint.route('/shop/<shop_id>/visit', methods=['GET'])
 @auth
-@requires("session_token")
-def check_visit(shop_id) -> (Response, int):
+def check_visit_viability(shop_id) -> (Response, int):
     """
     /v1/shop/<shop_id>/visit endpoint
 
@@ -115,14 +113,14 @@ def check_visit(shop_id) -> (Response, int):
     session_token = request.args.get("session_token")
     user_id = get_user_id(session_token)
 
-    if check_visit_query(user_id, shop_id) != date.today():
+    if check_last_visit_date(user_id, shop_id) != date.today():
         return jsonify({"status": "success", "message": "visit_possible"}), 200
     else:
         return jsonify({"status": "fail", "message": "visit_impossible"}), 403
 
 
 @visit_endpoint.route('/user/<user_id>/visits', methods=['GET'])
-def check_user_visits(user_id) -> (Response, int):
+def return_user_visits(user_id) -> (Response, int):
     """
     /v1/user/<user_id>/visits endpoint
 

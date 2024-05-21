@@ -122,7 +122,7 @@ def get_comment(shop_id: int, comment_id: int) -> dict:
 
 @comment_endpoint.route('/shop/<shop_id>/comment', methods=['POST'])
 @auth
-@requires('session_token', 'content')
+@requires('content')
 def write_comment(shop_id: int) -> (Response, int):
     """
     /v1/shop/<shop_id>/comment endpoint

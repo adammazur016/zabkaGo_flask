@@ -21,7 +21,7 @@ def generate_session_token(length: int = 128) -> str:
     return base64_encoded
 
 
-def user_exists(username: str) -> bool:
+def does_user_exists(username: str) -> bool:
     """
     Checks if the username exists in the database.
 
@@ -92,7 +92,7 @@ def login() -> (Response, int):
     password = request.args.get("password")
 
     # User does not exist, return 'wrong_password' to secure database from leaking valid users
-    if not user_exists(username):
+    if not does_user_exists(username):
         return jsonify({"status": "fail", "message": "wrong_password"}), 401
     # User exists and password is correct, return newly generated session token
     elif hash_password(password) == get_password(username):
