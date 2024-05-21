@@ -317,6 +317,20 @@ paths:
               example:
                 message: "visit_done"
                 status: "success"
+        '401':
+          description: Token session was invalid or not provided.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+              example:
+                message: "no_session_token"
+                status: "fail"
         '403':
           description: User is not allowed to visit shop again.
           content:
@@ -372,6 +386,20 @@ paths:
               example:
                 message: "visit_possible"
                 status: "success"
+        '401':
+          description: Token session was invalid or not provided.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+              example:
+                message: "no_session_token"
+                status: "fail"
         '403':
           description: User is not allowed to visit shop again.
           content:
@@ -470,7 +498,7 @@ paths:
             type: integer
       responses:
         '200':
-          description: User can visit shop again
+          description: Comment addition was successful
           content:
             application/json:
               schema:
@@ -493,6 +521,20 @@ paths:
                     type: string
               example:
                 message: "shop_id_and_parent_id_mismatch"
+                status: "fail"
+        '401':
+          description: Token session was invalid or not provided.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+              example:
+                message: "no_session_token"
                 status: "fail"
         '403':
           description: User is not allowed to comment because he didn't visit the shop.
