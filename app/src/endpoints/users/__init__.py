@@ -84,16 +84,16 @@ def return_user(user_id) -> (Response, int):
         return jsonify({"status": "fail", "message": "user_not_found"}), 404
 
 
-def add_rank_point(session_token, amount=1):
+def add_rank_point(user_id, amount=1):
     """
     Adds a ranking point to the user who owns the provided session token.
 
-    :param session_token: The session token of the user.
+    :param user_id: The id of the user.
     :param amount: (Default value = 1) The number of ranking points to add.
     """
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
             # Executing SQL Statements
-            query = f"UPDATE users SET rank_points = rank_points + {amount} WHERE session_token = '{session_token}'"
+            query = f"UPDATE users SET rank_points = rank_points + {amount} WHERE id = '{user_id}'"
             cursor.execute(query)
         cnx.commit()
