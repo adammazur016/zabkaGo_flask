@@ -14,7 +14,8 @@ services:
     ports:
       - "${FLASK_RUN_PORT}:${FLASK_RUN_PORT}"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       APP_NAME: ${APP_NAME}
       FLASK_ENV: ${FLASK_ENV}
@@ -43,6 +44,11 @@ services:
     volumes:
       - dbdata:/var/lib/mysql
       - ./init.sql:/data/application/init.sql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${MYSQL_USER}", "-p${MYSQL_PASSWORD}" ]
+      interval: 10s
+      timeout: 10s
+      start_period: 5s
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: pma

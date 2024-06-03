@@ -61,10 +61,10 @@ class GetHundredPoints(Achievement):
     def check_requirements(user_id: int):
         return check_point_count(needed_points=100, user_id=user_id)
 
-
+# Achievement list sorted by type
 VisitCountAchievements: list[Achievement] = [VisitFiveShops, VisitFiftyShops, VisitHundredShops]
 PointCountAchievements: list[Achievement] = [GetTenPoints, GetHundredPoints]
-
+AllAchievements: list[Achievement] = VisitCountAchievements + PointCountAchievements
 
 def dummy_check() -> bool:
     """
@@ -94,6 +94,27 @@ def check_visit_count(needed_count: int, user_id: int) -> bool:
         return True
     else:
         return False
+
+
+def sync_achievement_db():
+    """
+    Synchronizes achievements table making sure it's matching with hard-coded achievements.
+    """
+    with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
+        with cnx.cursor() as cursor:
+            for achievement in AllAchievements:
+                query = f"SELECT name, description FROM achievements WHERE id = '{achievement.id}'"
+                cursor.execute(query)
+                data = cursor.fetchone()
+                # Entry with given id does not exist, create new one
+                if not data:
+                    query = f"INSERT INTO achievements (id, name, description) VALUES (%s, %s, %s)"
+                    cursor.execute(query, (achievement.id, achievement.name, achievement.description))
+                # Entry does exist, but values are different
+                elif data[0] != achievement.name or data[1] != achievement.description:
+                    query = f"UPDATE achievements SET name = %s, description = %s WHERE id = %s"
+                    cursor.execute(query, (achievement.name, achievement.description, achievement.id))
+            cnx.commit()
 
 
 def check_point_count(needed_points: int, user_id: int) -> bool:

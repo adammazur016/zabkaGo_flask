@@ -35,13 +35,6 @@ CREATE TABLE `achievements` (
   `description` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Dumping data for table `achievements`
---
-
-INSERT INTO `achievements` (`id`, `name`, `description`) VALUES
-(1, '5pkt', 'Zdobądź 5 punktów');
-
 -- --------------------------------------------------------
 
 --
