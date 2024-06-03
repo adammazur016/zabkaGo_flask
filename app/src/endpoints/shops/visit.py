@@ -5,6 +5,7 @@ from src.query_methods import auth, get_user_id, triggers, does_shop_exist
 from src import app_config
 from src.endpoints.users import add_rank_point
 from src import achievements
+from src.sanitize import sanitize
 
 visit_endpoint = Blueprint('visit', __name__)
 
@@ -106,6 +107,11 @@ def check_visit_viability(shop_id) -> (Response, int):
     :param shop_id: The ID of the shop to be visited.
     :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
+
+    valid, response, code = sanitize([(shop_id, int)])
+    if not valid:
+        return response, code
+
     # Check if shop exists
     if not does_shop_exist(shop_id):
         return jsonify({"status": "fail", "message": "shop_not_found"}), 404
@@ -129,6 +135,10 @@ def return_user_visits(user_id) -> (Response, int):
     :param user_id: The ID of the user.
     :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
+    # Check if passed parameters use allowed characters
+    valid, response, code = sanitize([(user_id, int)])
+    if not valid:
+        return response, code
 
     user_data = get_user_visits(user_id)
 

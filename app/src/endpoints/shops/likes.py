@@ -3,6 +3,7 @@ import mysql.connector
 from src.query_methods import auth, get_user_id, does_shop_exist
 from src.endpoints.shops.visit import check_last_visit_date
 from src import app_config
+from src.sanitize import sanitize
 
 likes_endpoint = Blueprint('comments', __name__)
 
@@ -47,7 +48,12 @@ def get_shop_likes(shop_id: int) -> int:
 
 @likes_endpoint.route('/shop/<shop_id>/like', methods=['GET'])
 @auth
-def return_is_liked(shop_id: int) -> (Response, int):
+def return_is_liked(shop_id) -> (Response, int):
+    # Check if passed parameters use allowed characters
+    valid, response, code = sanitize([(shop_id, int)])
+    if not valid:
+        return response, code
+
     user_id = get_user_id(request.args['session_token'])
     if not does_shop_exist(shop_id):
         return jsonify({"status": "fail", "message": "shop_not_found"}), 404
@@ -61,7 +67,12 @@ def return_is_liked(shop_id: int) -> (Response, int):
 
 @likes_endpoint.route('/shop/<shop_id>/like', methods=['POST'])
 @auth
-def like_shop(shop_id: int) -> (Response, int):
+def like_shop(shop_id) -> (Response, int):
+    # Check if passed parameters use allowed characters
+    valid, response, code = sanitize([(shop_id, int)])
+    if not valid:
+        return response, code
+
     user_id = get_user_id(request.args['session_token'])
     if not does_shop_exist(shop_id):
         return jsonify({"status": "fail", "message": "shop_not_found"}), 404
@@ -76,6 +87,11 @@ def like_shop(shop_id: int) -> (Response, int):
 
 
 @likes_endpoint.route('/shop/<shop_id>/likes', methods=['GET'])
-def return_shop_likes(shop_id: int) -> (Response, int):
+def return_shop_likes(shop_id) -> (Response, int):
+    # Check if passed parameters use allowed characters
+    valid, response, code = sanitize([(shop_id, int)])
+    if not valid:
+        return response, code
+
     likes_number = get_shop_likes(shop_id)
     return jsonify({"shop_id": int(shop_id), "likes": likes_number}), 200

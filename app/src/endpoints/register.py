@@ -2,6 +2,7 @@ from flask import request, Blueprint, jsonify, Response
 from src import app_config
 import mysql.connector
 from src.query_methods import hash_password, requires
+from src.sanitize import sanitize
 
 register_endpoint = Blueprint('register', __name__)
 
@@ -23,7 +24,8 @@ def check_username_validity(username: str) -> (bool, str, int):
     # Check if username is taken
     with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
         with cnx.cursor() as cursor:
-            query = f"SELECT EXISTS(SELECT * FROM users WHERE login = '{username}')"
+            query = f"SELECT EXISTS(SELECT * FROM users WHERE login = \
+                    '{username}')"
             cursor.execute(query)
             user_exists = cursor.fetchone()[0]
 
@@ -67,6 +69,10 @@ def register() -> (Response, int):
     """
     username = request.args.get("username")
     password = request.args.get("password")
+    # Check if passed parameters use allowed characters
+    valid, response, code = sanitize([(username, str), (password, str)])
+    if not valid:
+        return response, code
 
     is_valid_username, message, status_code = check_username_validity(username)
     if not is_valid_username:

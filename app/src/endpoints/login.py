@@ -5,6 +5,8 @@ import mysql.connector
 import base64
 import os
 
+from src.sanitize import sanitize
+
 login_endpoint = Blueprint('login', __name__)
 
 
@@ -90,6 +92,11 @@ def login() -> (Response, int):
     """
     username = request.args.get("username")
     password = request.args.get("password")
+
+    # Check if passed parameters use allowed characters
+    valid, response, code = sanitize([(username, str), (password, str)])
+    if not valid:
+        return response, code
 
     # User does not exist, return 'wrong_password' to secure database from leaking valid users
     if not does_user_exists(username):

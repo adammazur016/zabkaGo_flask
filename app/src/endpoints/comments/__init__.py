@@ -2,6 +2,7 @@ from flask import request, Blueprint, jsonify, Response
 import mysql.connector
 from src.query_methods import auth, requires, get_user_id, does_shop_exist
 from src import app_config
+from src.sanitize import sanitize
 
 comment_endpoint = Blueprint('comments', __name__)
 
@@ -136,6 +137,10 @@ def write_comment(shop_id: int) -> (Response, int):
     session_token = request.args.get("session_token")
     content = request.args.get("content")
     parent_id = request.args.get("parent_id")
+    # Check if passed parameters use allowed characters
+    valid, response, code = sanitize([(shop_id, int), (parent_id, int)])
+    if not valid:
+        return response, code
     # Check if shop exists
     if not does_shop_exist(shop_id):
         return jsonify({"status": "fail", "message": "shop_not_found"}), 404
@@ -152,7 +157,7 @@ def write_comment(shop_id: int) -> (Response, int):
 
 
 @comment_endpoint.route('/shop/<shop_id>/comment/<comment_id>', methods=['GET'])
-def read_comment(shop_id: int, comment_id: int) -> (Response, int):
+def read_comment(shop_id, comment_id) -> (Response, int):
     """
     /v1/shop/<shop_id>/comment/<comment_id> endpoint
 
@@ -162,6 +167,10 @@ def read_comment(shop_id: int, comment_id: int) -> (Response, int):
     :param comment_id: The ID of the comment.
     :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
+    # Check if passed parameters use allowed characters
+    valid, response, code = sanitize([(shop_id, int), (comment_id, int)])
+    if not valid:
+        return response, code
     if not does_shop_exist(shop_id):
         return jsonify({"status": "fail", "message": "shop_not_found"}), 404
     comment = get_comment(shop_id, comment_id)
@@ -172,7 +181,7 @@ def read_comment(shop_id: int, comment_id: int) -> (Response, int):
 
 
 @comment_endpoint.route('/shop/<shop_id>/comments', methods=['GET'])
-def read_comments(shop_id: int) -> (Response, int):
+def read_comments(shop_id) -> (Response, int):
     """
     /v1/shop/<shop_id>/comments endpoint
 
@@ -182,6 +191,10 @@ def read_comments(shop_id: int) -> (Response, int):
     :param shop_id: The ID of the shop.
     :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
+    # Check if passed parameters use allowed characters
+    valid, response, code = sanitize([(shop_id, int)])
+    if not valid:
+        return response, code
     if not does_shop_exist(shop_id):
         return jsonify({"status": "fail", "message": "shop_not_found"}), 404
     comments = get_comments(shop_id)

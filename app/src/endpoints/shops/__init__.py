@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, Response
 from src import app_config
 import mysql.connector
 from src.endpoints.shops import visit, likes
+from src.sanitize import sanitize
 
 shops_endpoint = Blueprint('shops', __name__)
 
@@ -78,6 +79,11 @@ def return_shop(shop_id) -> (Response, int):
     :param shop_id: The ID of the shop.
     :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
+    # Check if passed parameters use allowed characters
+    valid, response, code = sanitize([(shop_id, int)])
+    if not valid:
+        return response, code
+
     shop = get_shop(shop_id)
     if shop:
         return jsonify(shop), 200

@@ -2,6 +2,8 @@ from flask import request, Blueprint, jsonify, Response
 from src import app_config
 import mysql.connector
 
+from src.sanitize import sanitize
+
 DEFAULT_USER_COUNT = 50
 MAX_USERS_PER_REQUEST = 999
 users_endpoint = Blueprint('users', __name__)
@@ -75,6 +77,11 @@ def return_user(user_id) -> (Response, int):
 
     :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
+    # Check if passed parameters use allowed characters
+    valid, response, code = sanitize([(user_id, int)])
+    if not valid:
+        return response, code
+
     user_data = get_user(user_id)
 
     # Empty user_data -> user was not found

@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, Response
 import mysql.connector
 from src import app_config
+from src.sanitize import sanitize
 
 achievements_endpoint = Blueprint('achievements', __name__)
 
@@ -76,6 +77,11 @@ def return_achievement_data(achievement_id: int) -> (Response, int):
     :param achievement_id: The ID of the achievement.
     :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
+    # Check if passed parameters use allowed characters
+    valid, response, code = sanitize([(achievement_id, int)])
+    if not valid:
+        return response, code
+
     achievement_data = get_achievement(achievement_id)
     if achievement_data:
         return jsonify(achievement_data), 200
@@ -106,7 +112,9 @@ def return_user_achievements(user_id) -> (Response, int):
     :param user_id: The ID of the user.
     :return: JSON-serialized response, along with the corresponding HTTP status code.
     """
-
+    valid, response, code = sanitize([(user_id, int)])
+    if not valid:
+        return response, code
     user_data = get_user_achievements(user_id)
 
     # Empty user_data -> user was not found or did not obtain any achievements
