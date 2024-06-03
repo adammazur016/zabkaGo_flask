@@ -1,7 +1,8 @@
 from flask import request, Blueprint, jsonify, Response
 import mysql.connector
 from datetime import date
-from src.query_methods import auth, get_user_id, triggers, does_shop_exist
+from src.query_methods import auth, triggers
+from src.helper_methods import does_shop_exist, get_user_id
 from src import app_config
 from src.endpoints.users import add_rank_point
 from src import achievements

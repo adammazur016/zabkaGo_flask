@@ -1,6 +1,7 @@
 from flask import request, Blueprint, jsonify, Response
 import mysql.connector
-from src.query_methods import auth, get_user_id, does_shop_exist
+from src.query_methods import auth
+from src.helper_methods import does_shop_exist, get_user_id
 from src.endpoints.shops.visit import check_last_visit_date
 from src import app_config
 from src.sanitize import sanitize

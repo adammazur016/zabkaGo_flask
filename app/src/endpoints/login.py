@@ -1,6 +1,8 @@
 from flask import request, Blueprint, jsonify, Response
 from src import app_config
-from src.query_methods import hash_password, requires, get_user_id
+from src.query_methods import requires
+from src.helper_methods import get_user_id
+from src.hashing import hash_password
 import mysql.connector
 import base64
 import os

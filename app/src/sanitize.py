@@ -1,5 +1,3 @@
-from typing import Match
-
 from flask import jsonify, Response
 import re
 

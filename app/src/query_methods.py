@@ -1,55 +1,9 @@
 from functools import wraps
 from flask import request, jsonify, Response
+import mysql.connector
 from src import app_config
 from src.achievements import check_triggers, Achievement
-import mysql.connector
-import hashlib
-
-
-# TODO: Split into multiple files
-
-def get_user_id(session_token: str):
-    """
-    Retrieves the user ID associated with the given session token from the database.
-
-    :param session_token: The session token used to identify the user.
-    :return: The user ID if the session token is valid, otherwise an empty string.
-    """
-    with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
-        with cnx.cursor() as cursor:
-            cursor.execute(f"SELECT id FROM users WHERE session_token = '{session_token}'")
-            result = cursor.fetchall()
-            if not result:
-                return ''
-            else:
-                return result[0][0]
-
-
-def does_shop_exist(shop_id: int) -> bool:
-    with mysql.connector.connect(**app_config.MYSQL_CONFIG) as cnx:
-        with cnx.cursor() as cursor:
-            # Executing SQL Statements
-            # Replace login with display name later
-            query = f"SELECT EXISTS(SELECT * FROM places where id = {shop_id})"
-            cursor.execute(query)
-            exists = cursor.fetchone()[0]
-    return exists
-
-
-def hash_password(password: str) -> str:
-    """
-    Hashes a password using the SHA256 algorithm.
-
-    :param password: The password to be hashed.
-    :return: The hashed password.
-    """
-    # Convert password to bytes encoded in utf-8
-    password_bytes = password.encode('utf-8')
-
-    # Hash password with sha256
-    hashed_password = hashlib.sha256(password_bytes).hexdigest()
-
-    return hashed_password
+from src.helper_methods import get_user_id
 
 
 def access_denied() -> (Response, int):
@@ -127,5 +81,3 @@ def auth(func):
         else:
             return access_denied()
     return verify_key
-
-# TODO: Add input sanitization decorator
