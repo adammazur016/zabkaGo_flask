@@ -94,5 +94,8 @@ def return_shop_likes(shop_id) -> (Response, int):
     if not valid:
         return response, code
 
-    likes_number = get_shop_likes(shop_id)
-    return jsonify({"shop_id": int(shop_id), "likes": likes_number}), 200
+    if not does_shop_exist(shop_id):
+        return jsonify({"status": "fail", "message": "shop_not_found"}), 404
+    else:
+        likes_number = get_shop_likes(shop_id)
+        return jsonify({"shop_id": int(shop_id), "likes": likes_number}), 200
