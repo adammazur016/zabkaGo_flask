@@ -16,6 +16,7 @@ tags:
   - name: Account
   - name: Achievement
   - name: Comment
+  - name: Likes
   - name: Shop
   - name: User
   - name: Visit
@@ -682,6 +683,162 @@ paths:
                     type: string
               example:
                 message: "comment_not_found"
+                status: "fail"
+  /shop/{shop_id}/like:
+    get:
+      summary: Returns information if user liked specific shop.
+      tags:
+        - Likes
+      parameters:
+        - in: path
+          name: shop_id
+          required: true
+          schema:
+            type: integer
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Like information was returned without issue.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+              example:
+                - status: "success"
+                  message: "liked"
+                - status: "success"
+                  message: "not_liked"
+        '403':
+          description: User did not visit shop, therefore he can't like it.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+              example:
+                - status: "fail"
+                  message: "shop_not_visited"
+        '404':
+          description: Shop does not exist.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+              example:
+                - status: "fail"
+                  message: "shop_not_found"
+    post:
+      summary: Changes user's like status of specific shop.
+      description: Removes like is shop was liked already, adds like otherwise.
+      tags:
+        - Likes
+      parameters:
+        - in: path
+          name: shop_id
+          required: true
+          schema:
+            type: integer
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Like status was changed with no issues.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+              example:
+                - status: "success"
+                  message: "like_added"
+                - status: "success"
+                  message: "like_removed"
+        '403':
+          description: User did not visit shop, therefore he can't like it.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+              example:
+                - status: "fail"
+                  message: "shop_not_visited"
+        '404':
+          description: Shop not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+              example:
+                - status: "fail"
+                  message: "shop_not_found"
+  /shop/{shop_id}/likes:
+    get:
+      summary: Returns number of likes of specific shop.
+      tags:
+        - Likes
+      parameters:
+        - in: path
+          name: shop_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Likes number was returned with no issues.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  shop_id:
+                    type: integer
+                  likes:
+                    type: integer
+              example:
+                - shop_id: 1
+                  likes: 15
+        '404':
+          description: Shop not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+              example:
+                message: "shop_not_found"
                 status: "fail"
   /achievement/{achievement_id}:
     get:
