@@ -3,7 +3,7 @@ import re
 
 
 def is_integer(value: str) -> bool:
-    return (re.fullmatch(r"-?\d+", value) is not None)
+    return bool(re.fullmatch(r"-?\d+", value) is not None)
 
 
 def is_dangerous(value: str) -> bool:
