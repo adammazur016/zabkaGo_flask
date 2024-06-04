@@ -20,7 +20,10 @@ def sanitize(args: list[tuple[str, type]]) -> (bool, Response, int):
     :param args: List of tuples containing parameter and it's desired type.
     """
     for arg in args:
-        if arg[1] == int:
+        # Optional arguments may be passed as None, this condition prevents it from being passed to regex.
+        if not arg[0]:
+            continue
+        elif arg[1] == int:
             if not is_integer(arg[0]):
                 return False, jsonify({"status": "fail", "message": "incorrect_parameter_format", "parameter": arg[0]}), 400
         elif arg[1] == str:
