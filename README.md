@@ -1,6 +1,6 @@
 # Zabka Go
-Backend do projektu "Żabka Go" na zaliczenie przedmiotu "Aplikacje Mobilne". \
-Aplikacja frontendowa: https://github.com/adammazur016/zabbkaGo_android
+Backend part of "Żabka Go" project made for "Mobile Applications" course at Wrocław University of Science and Technology. \
+Frontend application: https://github.com/adammazur016/zabbkaGo_android
 ## Usage
 Application is prepared for containerization with docker-compose plugin. To test application use: \
 `git clone https://github.com/adammazur016/zabkaGo_flask` \
